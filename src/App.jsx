@@ -13,6 +13,9 @@ import LogOut from './components/Logout/logout';
 import GameGrid from './components/Juegos/juegos';
 import News from './components/News/news';
 import RankSystem from './components/RankSystem/rankSystem';
+import RankUpNotice from './components/RankUpNotice/rankUpNotice';
+import OfferBanner from './components/OfferBanner/offerBanner';
+import AdminOffers from './components/AdminPanel/Offers/offers';
 import regaloBienvenida from '../src/assets/regalobienvenida.png';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchSiteContent, getUserByEmail } from './redux/actions';
@@ -29,8 +32,10 @@ import FuriaOlimpo from './components/Juegos/FuriaOlimpo/furiaolimpo';
 import GildedCobra from './components/Juegos/GildedCobra/gildedcobra';
 import Domino from './components/Juegos/Domino/domino';
 import Parchis from './components/Juegos/Parchis/parchis';
+import Buraco from './components/Juegos/Buraco/buraco';
 import GemaOfGold from './components/Juegos/GemaOfGold/gemaofgold';
 import RoyalRuleta from './components/Juegos/RoyalRuleta/royalruleta';
+import Blackjack from './components/Juegos/Blackjack/blackjack';
 import API_URL from './api/rutaApi';
 import Swal from 'sweetalert2';
 import { tokenStore } from './api/tokenStore';
@@ -38,16 +43,21 @@ import { capturePromoFromUrl, getPendingPromo, clearPendingPromo } from './utils
 import AboutUs from './components/AboutUs/aboutUs';
 import UserManagement from './components/AdminPanel/UserManagement/userManagement';
 import AdminDashboard from './components/AdminPanel/AdminDashboard/adminDashboard';
+import AdminPresence from './components/AdminPanel/Presence/presence';
+import useSeo from './utils/useSeo';
 import SupportTicketsAdmin from './components/AdminPanel/SupportTickets/supportTickets';
 import AdminDeposits from './components/AdminPanel/Deposits/deposits';
 import AdminPrizes from './components/AdminPanel/Prizes/prizes';
 import AdminReferrals from './components/AdminPanel/Referrals/referrals';
 import AdminGameStats from './components/AdminPanel/GameStats/gameStats';
 import AdminPromos from './components/AdminPanel/Promos/promos';
+import AdminStaffChips from './components/AdminPanel/StaffChips/staffChips';
+import AdminReports from './components/AdminPanel/Reports/reports';
 import BingoBots from './components/AdminPanel/BingoBots/bingoBots';
 import MinesBots from './components/AdminPanel/MinesBots/minesBots';
 import DominoBots from './components/AdminPanel/DominoBots/dominoBots';
 import ParchisBots from './components/AdminPanel/ParchisBots/parchisBots';
+import BuracoBots from './components/AdminPanel/BuracoBots/buracoBots';
 import UnityBots from './components/AdminPanel/UnityBots/unityBots';
 import Trophies from './components/AdminPanel/Trophies/trophies';
 import GameImages from './components/AdminPanel/GameImages/gameImages';
@@ -65,13 +75,16 @@ import Support from './components/Support/support';
 import Contact from './components/Contact/contact';
 import Faq from './components/Faq/faq';
 import Privacidad from './components/Legal/privacidad';
+import EliminarCuenta from './components/Legal/eliminarCuenta';
 import Cumplimiento from './components/Legal/cumplimiento';
 import Careers from './components/Careers/careers';
+import GlobalChat from './components/GlobalChat/globalChat';
 
 function App() {
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const { currentUser } = useSelector((state) => state);
   const location = useLocation();
+  useSeo();
   const dispatch = useDispatch();
 
   // Site-wide editable text/image overrides (Inicio, Nosotros, etc.) — public, needed even
@@ -224,21 +237,26 @@ function App() {
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/perfil/:userNick" element={<Perfil isPublic={true} />} />
             <Route path="/juegos" element={<RequireAuth><GameGrid /></RequireAuth>} />
-            <Route path="/juegos/:slug" element={<RequireAuth><GameDetail /></RequireAuth>} />
+            <Route path="/juegos/:slug" element={<GameDetail />} />
             <Route path="/chips" element={<BuyChips />} />
             <Route path="/logout" element={<LogOut />} />
             <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/online" element={<ProtectedRoute><AdminPresence /></ProtectedRoute>} />
             <Route path="/admin/tickets" element={<ProtectedRoute><SupportTicketsAdmin /></ProtectedRoute>} />
             <Route path="/admin/deposits" element={<ProtectedRoute><AdminDeposits /></ProtectedRoute>} />
+            <Route path="/admin/staff-chips" element={<ProtectedRoute><AdminStaffChips /></ProtectedRoute>} />
+            <Route path="/admin/denuncias" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/prizes" element={<ProtectedRoute><AdminPrizes /></ProtectedRoute>} />
             <Route path="/admin/referrals" element={<ProtectedRoute><AdminReferrals /></ProtectedRoute>} />
             <Route path="/admin/game-stats" element={<ProtectedRoute><AdminGameStats /></ProtectedRoute>} />
             <Route path="/admin/promos" element={<ProtectedRoute><AdminPromos /></ProtectedRoute>} />
+            <Route path="/admin/ofertas" element={<ProtectedRoute><AdminOffers /></ProtectedRoute>} />
             <Route path="/admin/bingo-bots" element={<ProtectedRoute><BingoBots /></ProtectedRoute>} />
             <Route path="/admin/mines-bots" element={<ProtectedRoute><MinesBots /></ProtectedRoute>} />
             <Route path="/admin/domino-bots" element={<ProtectedRoute><DominoBots /></ProtectedRoute>} />
             <Route path="/admin/parchis-bots" element={<ProtectedRoute><ParchisBots /></ProtectedRoute>} />
+            <Route path="/admin/buraco-bots" element={<ProtectedRoute><BuracoBots /></ProtectedRoute>} />
             <Route path="/admin/unity-bots" element={<ProtectedRoute><UnityBots /></ProtectedRoute>} />
             <Route path="/admin/trophies" element={<ProtectedRoute><Trophies /></ProtectedRoute>} />
             <Route path="/admin/game-images" element={<ProtectedRoute><GameImages /></ProtectedRoute>} />
@@ -247,6 +265,7 @@ function App() {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
             <Route path="/privacidad" element={<Privacidad />} />
+            <Route path="/eliminar-cuenta" element={<EliminarCuenta />} />
             <Route path="/cumplimiento" element={<Cumplimiento />} />
             <Route path="/trabaja-con-nosotros" element={<Careers />} />
             <Route path="/game/minas" element={<RequireAuth><Diamantes /></RequireAuth>} />
@@ -260,8 +279,10 @@ function App() {
             <Route path="/game/gildedcobra" element={<RequireAuth><GildedCobra /></RequireAuth>} />
             <Route path="/game/domino" element={<RequireAuth><Domino /></RequireAuth>} />
             <Route path="/game/parchis" element={<RequireAuth><Parchis /></RequireAuth>} />
+            <Route path="/game/buraco" element={<RequireAuth><Buraco /></RequireAuth>} />
             <Route path="/game/gemaofgold" element={<RequireAuth><GemaOfGold /></RequireAuth>} />
             <Route path="/game/royalruleta" element={<RequireAuth><RoyalRuleta /></RequireAuth>} />
+            <Route path="/game/blackjack" element={<RequireAuth><Blackjack /></RequireAuth>} />
             <Route path="/royalstore" element={<RoyalStore />} />
             <Route path="/amigos" element={<Friends />} />
             <Route path="/mensajes" element={<Messages />} />
@@ -278,6 +299,9 @@ function App() {
           {!location.pathname.includes('/game') && <Footer />}
           </div>
         </div>
+        <GlobalChat />
+        <RankUpNotice />
+        <OfferBanner />
         {showWelcomeGift && currentUser?.id && createPortal(
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"

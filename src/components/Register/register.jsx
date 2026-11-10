@@ -29,6 +29,7 @@ const RegistroForm = ({ className, children }) => {
 
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const [isTermsChecked, setIsTermsChecked] = useState(false);
+    const [isMarketingChecked, setIsMarketingChecked] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -149,6 +150,7 @@ const RegistroForm = ({ className, children }) => {
                 input.password,
                 input.sexo,
                 input.referredByCode.trim() || undefined,
+                isMarketingChecked,
             );
 
             await dispatch(getUserByEmail(input.email));
@@ -202,7 +204,6 @@ const RegistroForm = ({ className, children }) => {
             {isRegisterOpen && createPortal(
                 <div
                     className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
-                    onClick={toggleRegisterBox}
                 >
                     <main
                         className="relative z-10 w-full max-w-[420px] border border-primary/15 rounded-xl overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.65),0_0_50px_-12px_rgba(201,168,76,0.15)] transition-all duration-300 my-4 select-none"
@@ -242,7 +243,7 @@ const RegistroForm = ({ className, children }) => {
                         <form onSubmit={handleSubmit} className="px-6 pb-6 pt-4 space-y-3.5 relative z-10" id="registrationForm">
                             {/* Username / Full Name */}
                             <div className="space-y-1">
-                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">{t("register.nickLabel")}</label>
+                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">{t("register.nickLabel")}</label>
                                 <input
                                     className="w-full bg-[#0A0A0F] border border-[#2A2A36] rounded-lg py-2 px-3 text-on-surface font-body-md transition-all text-sm"
                                     placeholder={t("register.nickPlaceholder")}
@@ -254,15 +255,15 @@ const RegistroForm = ({ className, children }) => {
                                     onBlur={handleNickBlur}
                                 />
                                 {errors.nick ? (
-                                    <p className="text-red-500 text-[11px] mt-0.5">{errors.nick}</p>
+                                    <p className="text-red-500 text-[0.6875rem] mt-0.5">{errors.nick}</p>
                                 ) : checking.nick ? (
-                                    <p className="text-on-surface-variant text-[11px] mt-0.5">{t("register.checkingAvailability")}</p>
+                                    <p className="text-on-surface-variant text-[0.6875rem] mt-0.5">{t("register.checkingAvailability")}</p>
                                 ) : null}
                             </div>
 
                             {/* Email */}
                             <div className="space-y-1">
-                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">{t("register.emailLabel")}</label>
+                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">{t("register.emailLabel")}</label>
                                 <input
                                     className="w-full bg-[#0A0A0F] border border-[#2A2A36] rounded-lg py-2 px-3 text-on-surface font-body-md transition-all text-sm"
                                     placeholder={t("register.emailPlaceholder")}
@@ -274,9 +275,9 @@ const RegistroForm = ({ className, children }) => {
                                     onBlur={handleEmailBlur}
                                 />
                                 {errors.email ? (
-                                    <p className="text-red-500 text-[11px] mt-0.5">{errors.email}</p>
+                                    <p className="text-red-500 text-[0.6875rem] mt-0.5">{errors.email}</p>
                                 ) : checking.email ? (
-                                    <p className="text-on-surface-variant text-[11px] mt-0.5">{t("register.checkingAvailability")}</p>
+                                    <p className="text-on-surface-variant text-[0.6875rem] mt-0.5">{t("register.checkingAvailability")}</p>
                                 ) : null}
                             </div>
 
@@ -284,7 +285,7 @@ const RegistroForm = ({ className, children }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {/* Password */}
                                 <div className="space-y-1 relative">
-                                    <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">{t("register.passwordLabel")}</label>
+                                    <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">{t("register.passwordLabel")}</label>
                                     <div className="relative">
                                         <input
                                             className="w-full bg-[#0A0A0F] border border-[#2A2A36] rounded-lg py-2 px-3 pr-8 text-on-surface font-body-md transition-all text-sm"
@@ -306,11 +307,11 @@ const RegistroForm = ({ className, children }) => {
                                             </span>
                                         </button>
                                     </div>
-                                    {errors.password && <p className="text-red-500 text-[11px] mt-0.5">{errors.password}</p>}
+                                    {errors.password && <p className="text-red-500 text-[0.6875rem] mt-0.5">{errors.password}</p>}
                                 </div>
                                 {/* Confirm Password */}
                                 <div className="space-y-1 relative">
-                                    <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">{t("register.confirmPasswordLabel")}</label>
+                                    <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">{t("register.confirmPasswordLabel")}</label>
                                     <div className="relative">
                                         <input
                                             className="w-full bg-[#0A0A0F] border border-[#2A2A36] rounded-lg py-2 px-3 pr-8 text-on-surface font-body-md transition-all text-sm"
@@ -332,15 +333,15 @@ const RegistroForm = ({ className, children }) => {
                                             </span>
                                         </button>
                                     </div>
-                                    {errors.confirmPassword && <p className="text-red-500 text-[11px] mt-0.5">{errors.confirmPassword}</p>}
+                                    {errors.confirmPassword && <p className="text-red-500 text-[0.6875rem] mt-0.5">{errors.confirmPassword}</p>}
                                 </div>
                             </div>
 
                             {/* Password Strength Meter */}
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[11px] text-on-surface-variant">{t("register.passwordStrengthLabel")}</span>
-                                    <span className={`text-[11px] font-bold ${strength.color}`}>{strength.text}</span>
+                                    <span className="text-[0.6875rem] text-on-surface-variant">{t("register.passwordStrengthLabel")}</span>
+                                    <span className={`text-[0.6875rem] font-bold ${strength.color}`}>{strength.text}</span>
                                 </div>
                                 <div className="flex gap-1 h-0.5 w-full">
                                     {strength.bars.map((filled, index) => (
@@ -356,7 +357,7 @@ const RegistroForm = ({ className, children }) => {
 
                             {/* Gender (Sexo) */}
                             <div className="space-y-1">
-                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">{t("register.genderLabel")}</label>
+                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">{t("register.genderLabel")}</label>
                                 <select
                                     className="w-full bg-[#0A0A0F] border border-[#2A2A36] rounded-lg py-2 px-3 text-on-surface font-body-md transition-all cursor-pointer text-sm"
                                     required
@@ -368,12 +369,12 @@ const RegistroForm = ({ className, children }) => {
                                     <option value="H">{t("register.genderMale")}</option>
                                     <option value="M">{t("register.genderFemale")}</option>
                                 </select>
-                                {errors.sexo && <p className="text-red-500 text-[11px] mt-0.5">{errors.sexo}</p>}
+                                {errors.sexo && <p className="text-red-500 text-[0.6875rem] mt-0.5">{errors.sexo}</p>}
                             </div>
 
                             {/* Referral Code (optional) */}
                             <div className="space-y-1">
-                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[11px]">
+                                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">
                                     {t("register.referralLabel")}
                                 </label>
                                 <input
@@ -412,6 +413,20 @@ const RegistroForm = ({ className, children }) => {
                                         >
                                             {t("register.termsLink")}
                                         </a>
+                                    </span>
+                                </label>
+                                {/* Opcional: sin tildar se registra igual, solo no recibe mails de ofertas */}
+                                <label className="flex items-start gap-2.5 cursor-pointer group mt-2">
+                                    <div className="relative flex items-center pt-0.5">
+                                        <input
+                                            className="peer h-4 w-4 rounded border-[#2A2A36] bg-[#0A0A0F] text-primary focus:ring-primary transition-all cursor-pointer"
+                                            type="checkbox"
+                                            checked={isMarketingChecked}
+                                            onChange={(e) => setIsMarketingChecked(e.target.checked)}
+                                        />
+                                    </div>
+                                    <span className="font-body-sm text-[12px] text-on-surface-variant group-hover:text-on-surface transition-colors select-none">
+                                        {t("register.marketingOptIn")}
                                     </span>
                                 </label>
                             </div>

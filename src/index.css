@@ -14,6 +14,15 @@ html, body, #root {
   box-sizing: border-box;
 }
 
+/* Celular: base de texto un 12% mas grande. Tailwind y Chakra miden en rem, asi que todo lo
+   que use rem (textos, botones, espacios) crece junto y en proporcion. */
+@media (max-width: 767px) {
+  html { font-size: 18px; }
+}
+/* Celular en "modo escritorio": el navegador dibuja la pagina a ~980px y la achica para que
+   entre en la pantalla, asi que todo se ve diminuto. index.html marca ese caso. */
+html.desktop-on-phone { font-size: 21px; }
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
 }
@@ -387,3 +396,16 @@ body .swal2-icon.swal2-info {
   background: rgba(230, 195, 100, 0.06);
 }
 
+/* Fondo de la página: imagen difuminada fija detrás de todo. Va en una capa fija (::before) y no con
+   background-attachment: fixed, que en iPhone se ve ampliado. Los campos de texto con bg-background
+   siguen opacos. */
+html { background: #0a0a12 !important; }
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #0a0a12 url("/fondo.jpg") center / cover no-repeat;
+  pointer-events: none;
+}
+body, .bg-background:not(input):not(select):not(textarea) { background-color: transparent !important; }

@@ -32,15 +32,17 @@ const PAYMENT_REGIONS = {
   co: { label: "Colombia", mercadoPago: { country: "co", currency: "COP", rate: 5200, symbol: "$" }, paypalCurrency: "USD" },
   mx: { label: "México", mercadoPago: { country: "mx", currency: "MXN", rate: 20, symbol: "$" }, paypalCurrency: "USD" },
   es: { label: "España", mercadoPago: null, paypalCurrency: "EUR" },
+  br: { label: "Brasil", mercadoPago: null, asaas: true, paypalCurrency: "USD" },
   other: { label: "Otro país", mercadoPago: null, paypalCurrency: "USD" },
 };
-const REGION_ORDER = ["ar", "co", "mx", "es", "other"];
+const REGION_ORDER = ["ar", "co", "mx", "es", "br", "other"];
 
 const PAYPAL_SYMBOLS = { USD: "US$", EUR: "€" };
+const OFFER_LINK_KEY = "royal_offer_link";
 
 // "Fichas base" de la promo: lo que da la tasa de siempre (500.000 fichas por dólar o euro, 500 por
 // peso). Cada paquete muestra su bonus (+X%) y el total que recibe, que es lo que se acredita.
-const BASE_CHIPS_PER_UNIT = { USD: 500_000, EUR: 500_000, ARS: 500 };
+const BASE_CHIPS_PER_UNIT = { USD: 500_000, EUR: 500_000, ARS: 500, BRL: 100_000 };
 
 // Client id de PayPal: tiene que ser del mismo entorno (sandbox o live) que PAYPAL_MODE
 // en el backend. Sin él no se muestra PayPal, en vez de caer a un id fijo de otro entorno.
@@ -82,6 +84,9 @@ const CHIP_CATALOG = {
   // Argentina: 20% más de fichas que el equivalente en dólares.
   ARS: tiers("ARS", 301, [[100, 120_000], [500, 900_000], [1_000, 3_000_000], [5_000, 18_000_000],
     [10_000, 60_000_000], [100_000, 900_000_000], [500_000, 6_000_000_000], [1_000_000, 18_000_000_000]]),
+  // Brasil (Asaas): mismas fichas que los paquetes de USD, con precios redondos en reales.
+  BRL: tiers("BRL", 401, [[5, 2_500_000], [25, 15_000_000], [50, 40_000_000], [250, 250_000_000],
+    [500, 600_000_000], [1000, 1_500_000_000], [2500, 7_500_000_000], [5000, 20_000_000_000]]),
 };
 
 // Porcentaje de bonus: cuánto más que las fichas base da el paquete.
@@ -156,12 +161,14 @@ export default function BuyChips() {
   const mercadoPago = regionConfig.mercadoPago;
   const paypalCurrency = regionConfig.paypalCurrency;
 
-  // Medio de pago por defecto al cambiar de país: Mercado Pago donde existe, si no PayPal.
-  useEffect(() => {
-    setPaymentMethod(mercadoPago ? "mercadopago" : "paypal");
-  }, [region, mercadoPago]);
+  const asaasAvailable = !!regionConfig.asaas;
 
-  const availableMethods = [mercadoPago && "mercadopago", PAYPAL_CLIENT_ID && "paypal"].filter(Boolean);
+  // Medio de pago por defecto al cambiar de país: el local donde existe, si no PayPal.
+  useEffect(() => {
+    setPaymentMethod(asaasAvailable ? "asaas" : mercadoPago ? "mercadopago" : "paypal");
+  }, [region, mercadoPago, asaasAvailable]);
+
+  const availableMethods = [mercadoPago && "mercadopago", asaasAvailable && "asaas", PAYPAL_CLIENT_ID && "paypal"].filter(Boolean);
 
   useEffect(() => {
     const el = paypalBoxRef.current;
@@ -177,10 +184,11 @@ export default function BuyChips() {
   // Qué paquetes y en qué moneda: Mercado Pago Argentina vende los de pesos; Colombia/México los de
   // USD convertidos a su moneda; PayPal los de USD o EUR (España) con el precio tal cual.
   const payingWithMercadoPago = paymentMethod === "mercadopago" && !!mercadoPago;
-  const catalogCurrency = payingWithMercadoPago ? (mercadoPago.currency === "ARS" ? "ARS" : "USD") : paypalCurrency;
+  const payingWithAsaas = paymentMethod === "asaas" && asaasAvailable;
+  const catalogCurrency = payingWithAsaas ? "BRL" : payingWithMercadoPago ? (mercadoPago.currency === "ARS" ? "ARS" : "USD") : paypalCurrency;
   const displayRate = payingWithMercadoPago && catalogCurrency === "USD" ? mercadoPago.rate : 1;
-  const currency = payingWithMercadoPago ? mercadoPago.currency : paypalCurrency;
-  const symbol = payingWithMercadoPago ? mercadoPago.symbol : PAYPAL_SYMBOLS[paypalCurrency];
+  const currency = payingWithAsaas ? "BRL" : payingWithMercadoPago ? mercadoPago.currency : paypalCurrency;
+  const symbol = payingWithAsaas ? "R$" : payingWithMercadoPago ? mercadoPago.symbol : PAYPAL_SYMBOLS[paypalCurrency];
   const getDisplayPrice = (chip) => (chip.price * displayRate).toFixed(2);
   // Con centavos siempre 2 decimales ("0,10"); montos enteros sin decimales ("1.000").
   const formatPrice = (chip) => {
@@ -190,10 +198,75 @@ export default function BuyChips() {
   };
   const formatChips = (amount) => new Intl.NumberFormat("es-ES").format(amount);
 
-  const visibleChipOptions = CHIP_CATALOG[catalogCurrency];
+  // Oferta vigente (panel -> Ofertas) en la moneda de este jugador, si la tiene. Fichas y precio los
+  // decide el backend a partir del packageId, igual que con los paquetes de siempre.
+  const [currentOffer, setCurrentOffer] = useState(null);
   useEffect(() => {
-    if (!visibleChipOptions.some((chip) => chip.id === selectedChip?.id)) setSelectedChip(visibleChipOptions[0]);
-  }, [catalogCurrency, paymentMethod]); // eslint-disable-line react-hooks/exhaustive-deps
+    axios.get(`${API_URL}/chip-offers/current`).then(({ data }) => setCurrentOffer(data?.offer ?? null)).catch(() => {});
+  }, [currentUser?.id]);
+
+  // Link de oferta de un solo uso (/chips?oferta=CODIGO): se guarda por si primero tiene que iniciar
+  // sesión, y con sesión se reclama. La primera cuenta que lo reclama se queda con la oferta.
+  const offerLinkTriedRef = useRef(false);
+  useEffect(() => {
+    const fromUrl = searchParams.get("oferta");
+    try {
+      if (fromUrl) localStorage.setItem(OFFER_LINK_KEY, fromUrl);
+    } catch {
+      // sin storage: se usa el de la URL
+    }
+    let token = fromUrl;
+    try {
+      token = token || localStorage.getItem(OFFER_LINK_KEY);
+    } catch {
+      // sin storage
+    }
+    if (!token || !currentUser?.id || offerLinkTriedRef.current) return;
+    offerLinkTriedRef.current = true;
+    const forget = () => {
+      try {
+        localStorage.removeItem(OFFER_LINK_KEY);
+      } catch {
+        // sin storage
+      }
+    };
+    axios
+      .post(`${API_URL}/chip-offers/claim/${encodeURIComponent(token)}`)
+      .then(({ data }) => {
+        forget();
+        if (!data?.offer) return;
+        setCurrentOffer(data.offer);
+        Swal.fire({
+          icon: "success",
+          title: `¡Tu oferta ${data.offer.multiplier}x1 está activa!`,
+          text: "Elegí cualquier paquete y recibís las fichas multiplicadas. Vale para una sola compra.",
+          confirmButtonText: "¡Genial!",
+          confirmButtonColor: "#C9A84C",
+          background: "#1a1a1a",
+          color: "#fff",
+        });
+      })
+      .catch((error) => {
+        forget();
+        Swal.fire({
+          icon: "info",
+          title: "Oferta no disponible",
+          text: error?.response?.data?.message || "Este link de oferta ya no se puede usar.",
+          confirmButtonColor: "#C9A84C",
+          background: "#1a1a1a",
+          color: "#fff",
+        });
+      });
+  }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Oferta express: cualquier paquete da sus fichas multiplicadas (el backend decide lo que se acredita).
+  const offerMultiplier = currentOffer?.multiplier ?? 1;
+  const visibleChipOptions = CHIP_CATALOG[catalogCurrency].map((chip) => ({ ...chip, chips: chip.chips * offerMultiplier }));
+  const offerItem = currentOffer?.items.find((item) => item.currency === catalogCurrency);
+  const offerChip = offerItem ? { id: offerItem.packageId, currency: offerItem.currency, price: offerItem.price, chips: offerItem.chips } : null;
+  useEffect(() => {
+    if (offerChip) setSelectedChip(offerChip);
+    else setSelectedChip(visibleChipOptions.find((chip) => chip.id === selectedChip?.id) ?? visibleChipOptions[0]);
+  }, [catalogCurrency, paymentMethod, offerChip?.id, offerMultiplier]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch real transaction history from backend
   useEffect(() => {
@@ -291,12 +364,68 @@ export default function BuyChips() {
     }
   };
 
+  // Asaas exige nombre y CPF de quien paga. Solo se ofrece en Brasil, por eso los textos van en
+  // portugués. El CPF se manda a Asaas y no se guarda en nuestra base.
+  const createAsaasOrder = async (billingType) => {
+    if (!currentUser?.id) {
+      Swal.fire({ icon: "warning", title: "Faça login", text: "Você precisa entrar na sua conta para comprar fichas.", confirmButtonColor: "#C9A84C" });
+      return;
+    }
+    const { value: payer } = await Swal.fire({
+      title: "Dados do pagador",
+      html:
+        '<input id="asaas-name" class="swal2-input" placeholder="Nome completo" maxlength="100" autocomplete="name">' +
+        '<input id="asaas-cpf" class="swal2-input" placeholder="CPF" maxlength="14" inputmode="numeric">',
+      confirmButtonText: "Continuar",
+      confirmButtonColor: "#C9A84C",
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      focusConfirm: false,
+      preConfirm: () => {
+        const name = document.getElementById("asaas-name").value.trim();
+        const cpf = document.getElementById("asaas-cpf").value.replace(/\D/g, "");
+        if (name.length < 3) return Swal.showValidationMessage("Informe seu nome completo.");
+        if (cpf.length !== 11) return Swal.showValidationMessage("O CPF deve ter 11 dígitos.");
+        return { name, cpf };
+      },
+    });
+    if (!payer) return;
+
+    try {
+      Swal.fire({
+        title: "Gerando seu pagamento...",
+        text: "Aguarde enquanto levamos você à página segura do Asaas.",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+      const { data } = await axios.post(`${API_URL}/asaas/create-order`, {
+        userId: currentUser.id,
+        packageId: selectedChip.id,
+        name: payer.name,
+        cpf: payer.cpf,
+        billingType,
+      });
+      if (!data?.invoiceUrl) throw new Error("No invoiceUrl returned from backend");
+      window.location.href = data.invoiceUrl;
+    } catch (error) {
+      const invalidCpf = error?.response?.data?.message === "CPF inválido.";
+      Swal.fire({
+        icon: invalidCpf ? "warning" : "error",
+        title: invalidCpf ? "CPF inválido" : "Erro no pagamento",
+        text: invalidCpf ? "Confira o número do CPF e tente novamente." : "Não foi possível gerar seu pagamento. Tente novamente.",
+        confirmButtonColor: "#C9A84C",
+      });
+    }
+  };
+
   // Helper formatting for platform name
   const formatPlatformName = (platform) => {
     if (!platform) return "Sistema";
     switch (platform.toLowerCase()) {
       case "paypal":
         return "PayPal Gateway";
+      case "asaas":
+        return "Asaas (BRL)";
       case "mepago":
         return "Mercado Pago (USD)";
       case "mepago_mx":
@@ -415,7 +544,7 @@ export default function BuyChips() {
                         <span className="material-symbols-outlined text-primary">public</span>
                         <span className="min-w-0">
                           <span className="block text-sm font-bold text-white">{regionConfig.label}</span>
-                          <span className="block text-[11px] text-on-surface-variant">
+                          <span className="block text-[0.6875rem] text-on-surface-variant">
                             Opciones de compra disponibles según desde dónde te conectás.
                           </span>
                         </span>
@@ -441,7 +570,7 @@ export default function BuyChips() {
                     </div>
                     )}
                     {viewerIsAdmin && detectedRegion && (
-                      <p className="mt-1.5 text-[11px] text-on-surface-variant">
+                      <p className="mt-1.5 text-[0.6875rem] text-on-surface-variant">
                         Tu conexión: {PAYMENT_REGIONS[detectedRegion].label}. Como admin podés elegir otro país para probar; los jugadores solo ven el suyo.
                       </p>
                     )}
@@ -475,7 +604,28 @@ export default function BuyChips() {
                           </span>
                           <span className="min-w-0">
                             <span className="block text-xs font-bold text-white">Mercado Pago</span>
-                            <span className="block text-[10px] text-on-surface-variant">Pagás en {mercadoPago.currency}</span>
+                            <span className="block text-[0.625rem] text-on-surface-variant">Pagás en {mercadoPago.currency}</span>
+                          </span>
+                        </button>
+                      )}
+                      {asaasAvailable && (
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod("asaas")}
+                          aria-pressed={paymentMethod === "asaas"}
+                          className={`glass-card relative px-2.5 py-2 rounded-xl flex items-center gap-2 text-left border-2 transition-all cursor-pointer ${
+                            paymentMethod === "asaas"
+                              ? "border-primary bg-primary/20 shadow-[0_0_14px_rgba(230,195,100,0.45)]"
+                              : "border-outline-variant/30 opacity-70 hover:opacity-100 hover:border-primary/45"
+                          }`}
+                        >
+                          {paymentMethod === "asaas" && <SelectedMark />}
+                          <span className="w-8 h-8 rounded-full bg-[#32BCAD] flex items-center justify-center flex-shrink-0">
+                            <span className="material-symbols-outlined text-[18px] text-white">qr_code_2</span>
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-xs font-bold text-white">Pix ou cartão</span>
+                            <span className="block text-[0.625rem] text-on-surface-variant">Pague em reais (R$)</span>
                           </span>
                         </button>
                       )}
@@ -496,7 +646,7 @@ export default function BuyChips() {
                           </span>
                           <span className="min-w-0">
                             <span className="block text-xs font-bold text-white">PayPal</span>
-                            <span className="block text-[10px] text-on-surface-variant">Pagás en {paypalCurrency} · cuenta o tarjeta</span>
+                            <span className="block text-[0.625rem] text-on-surface-variant">Pagás en {paypalCurrency} · cuenta o tarjeta</span>
                           </span>
                         </button>
                       )}
@@ -508,15 +658,15 @@ export default function BuyChips() {
                     <p className="text-xs font-bold text-primary mb-2 uppercase tracking-wider">Tu cuenta</p>
                     <div className="grid grid-cols-2 gap-2">
                     <div className="glass-card px-3 py-2 rounded-xl">
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Mi Balance</p>
+                      <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Mi Balance</p>
                       <p className="text-sm font-bold text-white leading-tight break-all">
                         {new Intl.NumberFormat('es-ES').format(currentUser?.chips || 0)}
                       </p>
-                      <p className="text-[10px] text-green-400">Disponible para jugar</p>
+                      <p className="text-[0.625rem] text-green-400">Disponible para jugar</p>
                     </div>
                     <div className="glass-card px-3 py-2 rounded-xl">
                       <div className="flex items-center justify-between gap-1">
-                        <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Rango</p>
+                        <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Rango</p>
                         <RankBadge tier={rankStatus?.rank || currentUser?.rank} size="sm" />
                       </div>
                       {nextRank ? (
@@ -524,15 +674,15 @@ export default function BuyChips() {
                           <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-full h-1.5 w-full overflow-hidden mt-2">
                             <div className="royal-gold-gradient h-full rounded-full" style={{ width: `${rankProgressPercentage}%` }}></div>
                           </div>
-                          <p className="mt-1 text-[10px] text-on-surface-variant">{rankProgressPercentage}% hacia {nextRank.label}</p>
+                          <p className="mt-1 text-[0.625rem] text-on-surface-variant">{rankProgressPercentage}% hacia {nextRank.label}</p>
                         </>
                       ) : (
-                        <p className="mt-2 text-[10px] text-primary">Rango máximo alcanzado</p>
+                        <p className="mt-2 text-[0.625rem] text-primary">Rango máximo alcanzado</p>
                       )}
                       <button
                         type="button"
                         onClick={() => navigate("/rangos")}
-                        className="mt-1 text-[10px] font-bold text-primary underline cursor-pointer bg-transparent border-0 p-0"
+                        className="mt-1 text-[0.625rem] font-bold text-primary underline cursor-pointer bg-transparent border-0 p-0"
                       >
                         {rankBonusPercent > 0 ? `+${rankBonusPercent}% fichas por tu rango` : "¿Cómo subo de rango?"}
                       </button>
@@ -546,6 +696,36 @@ export default function BuyChips() {
                   <label className="text-xs font-bold text-primary mb-2 block uppercase tracking-wider">
                     3. Selecciona un Paquete de Fichas
                   </label>
+                  {offerMultiplier > 1 && (
+                    <div className="w-full mb-4 rounded-xl border-2 border-primary bg-primary/15 p-3 flex items-center gap-3 text-left">
+                      <img src={currentOffer.imageUrl} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
+                      <span className="min-w-0">
+                        <span className="block text-white font-bold truncate">{currentOffer.title}</span>
+                        <span className="block text-sm text-primary font-bold">Todos los paquetes dan x{offerMultiplier} fichas</span>
+                      </span>
+                    </div>
+                  )}
+                  {offerChip && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedChip(offerChip)}
+                      aria-pressed={selectedChip?.id === offerChip.id}
+                      className={`w-full mb-3 flex items-center gap-4 p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${
+                        selectedChip?.id === offerChip.id
+                          ? "border-primary bg-primary/15 shadow-[0_0_22px_rgba(230,195,100,0.55)]"
+                          : "border-outline-variant/30 hover:border-primary/50"
+                      }`}
+                    >
+                      <img src={currentOffer.imageUrl} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-xs font-bold text-primary uppercase tracking-wider">Oferta</span>
+                        <span className="block text-white font-bold truncate">{currentOffer.title}</span>
+                        <span className="block text-sm text-on-surface-variant">
+                          {formatChips(offerChip.chips)} fichas por {symbol} {formatPrice(offerChip)}
+                        </span>
+                      </span>
+                    </button>
+                  )}
                   <div
                     className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[repeat(var(--pkg-cols),minmax(0,1fr))] gap-3"
                     style={{ "--pkg-cols": visibleChipOptions.length }}
@@ -608,12 +788,12 @@ export default function BuyChips() {
                           </div>
                           <div className="w-full rounded-xl border-2 border-yellow-400 bg-gradient-to-b from-yellow-100 to-yellow-200 px-1 py-1.5 leading-tight">
                               <p className="text-base font-black text-yellow-700">+{promoPercentOf(chip)}%</p>
-                              <p className="text-[10px] font-black text-yellow-700 uppercase tracking-wider">Bonus</p>
-                              <p className="text-[9px] text-neutral-600 mt-0.5">Recibís</p>
-                              <p className={`font-black text-neutral-900 whitespace-nowrap ${formatChips(chip.chips).length > 11 ? "text-[10px]" : "text-xs"}`}>
+                              <p className="text-[0.625rem] font-black text-yellow-700 uppercase tracking-wider">Bonus</p>
+                              <p className="text-[0.5625rem] text-neutral-600 mt-0.5">Recibís</p>
+                              <p className={`font-black text-neutral-900 whitespace-nowrap ${formatChips(chip.chips).length > 11 ? "text-[0.625rem]" : "text-xs"}`}>
                                 {formatChips(chip.chips)}
                               </p>
-                              <p className="text-[9px] text-neutral-600">fichas</p>
+                              <p className="text-[0.5625rem] text-neutral-600">fichas</p>
                             </div>
                         </div>
                       );
@@ -625,12 +805,12 @@ export default function BuyChips() {
                 <div className="glass-card rounded-2xl border border-outline-variant/20 bg-[#12121A]/60 p-4 flex flex-col lg:flex-row lg:items-center gap-4">
                   <div className="flex-1 min-w-0 flex flex-wrap items-end gap-x-8 gap-y-2">
                     <div>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Paquete</p>
+                      <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Paquete</p>
                       <p className="text-sm text-white font-bold">{selectedChip ? formatChips(selectedChip.chips) : "0"} fichas</p>
                     </div>
                     {rankBonusPercent > 0 && selectedChip && (
                       <div>
-                        <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">
+                        <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">
                           Bono {RANK_META[rankStatus?.rank]?.label || "de rango"} +{rankBonusPercent}%
                         </p>
                         <p className="text-sm text-green-400 font-bold">
@@ -639,17 +819,18 @@ export default function BuyChips() {
                       </div>
                     )}
                     <div>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Moneda</p>
+                      <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Moneda</p>
                       <p className="text-sm text-primary font-bold">{currency}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total a pagar</p>
+                      <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Total a pagar</p>
                       <p className="text-3xl font-black text-primary leading-none">
                         {symbol} {selectedChip ? formatPrice(selectedChip) : "0"}
                       </p>
                     </div>
                     {availableMethods.includes(paymentMethod) && (
-                      <p className="basis-full text-[11px] text-on-surface-variant leading-snug">
+                      <p className="basis-full text-[0.6875rem] text-on-surface-variant leading-snug">
+                        {paymentMethod === "asaas" && asaasAvailable && "Levamos você à página segura do Asaas para pagar em reais com Pix ou cartão. As fichas são creditadas assim que o pagamento é confirmado."}
                         {paymentMethod === "paypal" && `Pagás con PayPal en ${paypalCurrency}. Las fichas se acreditan apenas se confirma el pago.`}
                         {paymentMethod === "mercadopago" && mercadoPago && `Te llevamos a Mercado Pago para pagar en ${mercadoPago.currency} de forma segura. Las fichas se acreditan apenas se aprueba el pago.`}
                       </p>
@@ -743,6 +924,28 @@ export default function BuyChips() {
                         </div>
                       )}
 
+                      {/* ASAAS ACTIVE RENDER */}
+                      {paymentMethod === "asaas" && asaasAvailable && (
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => createAsaasOrder("PIX")}
+                            className="w-full bg-[#32BCAD] hover:bg-[#2AA396] py-3.5 rounded-xl text-white font-bold text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                          >
+                            <span className="material-symbols-outlined">qr_code_2</span>
+                            Pagar com Pix
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => createAsaasOrder("CREDIT_CARD")}
+                            className="w-full bg-surface-container border-2 border-primary hover:bg-primary/20 py-3.5 rounded-xl text-white font-bold text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                          >
+                            <span className="material-symbols-outlined">credit_card</span>
+                            Pagar com cartão (em reais)
+                          </button>
+                        </div>
+                      )}
+
                       {/* MERCADO PAGO ACTIVE RENDER */}
                       {paymentMethod === "mercadopago" && mercadoPago && (
                         <button
@@ -767,7 +970,7 @@ export default function BuyChips() {
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-left">
                   <div>
                     <h3 className="font-headline-sm text-headline-sm text-white mb-1">Registro de Auditoría Financiera</h3>
-                    <p className="text-body-sm text-on-surface-variant">Tus últimos depósitos y movimientos de fichas en el casino.</p>
+                    <p className="text-body-sm text-on-surface-variant">Tus últimos depósitos y movimientos de fichas en Royal Juegos.</p>
                   </div>
                   <div className="sm:w-56">
                     <select
@@ -854,7 +1057,7 @@ export default function BuyChips() {
                                   {item.type === "deposit" ? (
                                     <>
                                       + {symbol} {new Intl.NumberFormat('es-ES').format(parseFloat(item.price).toFixed(2))}
-                                      <span className="block text-[11px] font-normal text-on-surface-variant">
+                                      <span className="block text-[0.6875rem] font-normal text-on-surface-variant">
                                         {new Intl.NumberFormat('es-ES').format(item.chips)} fichas
                                       </span>
                                     </>
@@ -865,7 +1068,7 @@ export default function BuyChips() {
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusMeta.className}`}>
+                                  <span className={`px-3 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-wider ${statusMeta.className}`}>
                                     {statusMeta.label}
                                   </span>
                                 </td>

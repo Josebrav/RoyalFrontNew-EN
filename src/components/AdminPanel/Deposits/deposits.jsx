@@ -23,7 +23,8 @@ export default function AdminDeposits() {
   const viewerIsAdmin = useSelector((state) => state.currentUser?.role) === "admin";
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
+  // Por defecto solo las cargas aprobadas (las pendientes son pagos que no se completaron).
+  const [statusFilter, setStatusFilter] = useState("approved");
   const [forbidden, setForbidden] = useState(false);
 
   useEffect(() => {
@@ -93,15 +94,15 @@ export default function AdminDeposits() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-surface-container-high px-6 py-4 rounded-xl border border-outline-variant/20 flex flex-col">
-            <span className="text-[10px] uppercase tracking-widest text-primary">Cargas Mostradas</span>
+            <span className="text-[0.625rem] uppercase tracking-widest text-primary">Cargas Mostradas</span>
             <span className="font-headline-md text-headline-md">{deposits.length}</span>
           </div>
           <div className="bg-surface-container-high px-6 py-4 rounded-xl border border-outline-variant/20 flex flex-col">
-            <span className="text-[10px] uppercase tracking-widest text-primary">Fichas Aprobadas (Total)</span>
+            <span className="text-[0.625rem] uppercase tracking-widest text-primary">Fichas Aprobadas (Total)</span>
             <span className="font-headline-md text-headline-md">{new Intl.NumberFormat('es-ES').format(approvedTotal)}</span>
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 block">Filtrar por Estado</label>
+            <label className="text-[0.625rem] uppercase tracking-widest text-on-surface-variant mb-1 block">Filtrar por Estado</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -168,7 +169,7 @@ export default function AdminDeposits() {
                           {new Intl.NumberFormat('es-ES').format(deposit.chips)}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusMeta.className}`}>
+                          <span className={`px-3 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-wider ${statusMeta.className}`}>
                             {statusMeta.label}
                           </span>
                         </td>

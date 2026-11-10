@@ -4,13 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import API_URL from "../../api/rutaApi";
 import axios from "axios";
+import reportUser from "../../utils/reportUser";
 import chipsIcon from "../../assets/chips.png";
 import bannerPerfil from "../../assets/bannerperfil.png";
 import bannerPerfilDorado from "../../assets/BannerPerfilDorado.png";
 import bannerPerfilVerde from "../../assets/BannerPerfilVerde.png";
 import insigniaAdmin from "../../assets/InsigniaAdmin.png";
 import insigniaMod from "../../assets/InsigniaMod.png";
-import defaultAvatar from "../../assets/defaultAvatar.png";
+import AvatarImg from "../Avatar/avatarImg";
 import {
   viewedUserProfile,
   updateUserProfile,
@@ -416,7 +417,7 @@ const Perfil = ({ isPublic = false }) => {
                 const isOnline = isOwnProfile || (user.lastSeen && Date.now() - new Date(user.lastSeen).getTime() < 5 * 60 * 1000);
                 const activeGame = isOnline && !isOwnProfile ? getGameByPlayPath(user.currentActivity) : null;
                 return (
-                  <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-[10px] sm:text-[11px] font-bold whitespace-nowrap">
+                  <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-[0.625rem] sm:text-[0.6875rem] font-bold whitespace-nowrap">
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isOnline ? "bg-green-500 animate-pulse" : "bg-gray-500"}`} />
                     <span className={isOnline ? (activeGame ? "text-primary" : "text-green-500") : "text-on-surface-variant"}>
                       {activeGame ? `Jugando a ${activeGame.name}` : isOnline ? "Conectado" : "Desconectado"}
@@ -444,38 +445,17 @@ const Perfil = ({ isPublic = false }) => {
               <div
                 className="relative aspect-square w-full flex items-center justify-center bg-transparent overflow-visible"
               >
-                {avatarSrc ? (
-                  <img
+                {(
+                  <AvatarImg
                     alt="Avatar de Usuario"
                     className="w-full h-full object-contain object-bottom"
-                    src={avatarSrc}
-                    onError={(e) => {
-                      // Un solo swap, a un asset local que no puede fallar. El guard con
-                      // dataset es lo único fiable: React re-engancha el listener de error
-                      // en cada render, así que `target.onerror = null` no corta el bucle
-                      // (antes loopeaba contra user.image / placeholder remoto → 429).
-                      const target = e.currentTarget;
-                      if (target.dataset.fellBack) return;
-                      target.dataset.fellBack = "1";
-                      target.src = defaultAvatar;
-                    }}
+                    src={avatarSrc || user.image || null}
+                    fallback={
+                      <div className="w-full h-full rounded-full royal-gold-gradient flex items-center justify-center text-surface-container-lowest text-2xl sm:text-4xl font-bold">
+                        {getInitials(user.nick)}
+                      </div>
+                    }
                   />
-                ) : user.image ? (
-                  <img
-                    alt="Avatar de Usuario"
-                    className="w-full h-full object-contain object-bottom"
-                    src={user.image}
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (target.dataset.fellBack) return;
-                      target.dataset.fellBack = "1";
-                      target.src = defaultAvatar;
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full royal-gold-gradient flex items-center justify-center text-surface-container-lowest text-2xl sm:text-4xl font-bold">
-                    {getInitials(user.nick)}
-                  </div>
                 )}
                 {isOwnProfile && (
                   <button
@@ -544,7 +524,7 @@ const Perfil = ({ isPublic = false }) => {
               {(user.description || isOwnProfile) && (
                 <div className="hidden md:block mt-1 max-w-xl w-full glass-card rounded-xl px-4 py-3 text-left">
                   {bioMeta && (
-                    <p className="text-primary text-[10px] font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
+                    <p className="text-primary text-[0.625rem] font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
                   )}
                   <p className="text-on-surface text-xs leading-relaxed whitespace-pre-line line-clamp-3">
                     {user.description
@@ -655,6 +635,15 @@ const Perfil = ({ isPublic = false }) => {
                     >
                       <span className="material-symbols-outlined text-[20px]">{isBlocked ? "how_to_reg" : "block"}</span>
                       <span className="font-label-lg text-label-lg">{isBlocked ? "Desbloquear Usuario" : "Bloquear Usuario"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => reportUser({ userId: user.id, nick: capitalize(user.nick), context: "Perfil" })}
+                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-error"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">flag</span>
+                      <span className="font-label-lg text-label-lg">Denunciar Usuario</span>
                     </button>
                   </div>
                 </div>

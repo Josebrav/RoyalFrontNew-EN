@@ -1,6 +1,10 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { Box, Spinner, Center } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import API_URL from "../../../api/rutaApi";
+import { authService } from "../../../services/authService";
+import { LOCALE } from "../../../i18n/locale";
 
 const TAB_ID_KEY = "rg_tab_id";
 
@@ -25,9 +29,39 @@ function getTabId() {
   }
 }
 
+/** 12 h: el token dura 24 h, así que un juego abierto mucho tiempo recibe uno nuevo antes de que venza. */
+const GAME_TOKEN_REFRESH_MS = 12 * 60 * 60 * 1000;
+
+/** Token de juego (POST games/session-token): el servidor identifica al jugador por este token y no
+ *  por el jugadorID de la URL, que cualquiera puede cambiar. Sin sesión, el juego abre sin token. */
+async function fetchGameToken() {
+  if (!authService.getToken()) return "";
+  try {
+    const { data } = await axios.post(`${API_URL}/games/session-token`, {});
+    return data?.token || "";
+  } catch (error) {
+    console.error("No se pudo obtener el token de juego:", error);
+    return "";
+  }
+}
+
+function withGameToken(src, token) {
+  if (!src || !token) return src;
+  return `${src}${src.includes("?") ? "&" : "?"}gameToken=${encodeURIComponent(token)}`;
+}
+
+function frameOrigin(src) {
+  try {
+    return new URL(src).origin;
+  } catch {
+    return null;
+  }
+}
+
 function withTabId(src) {
   if (!src) return src;
-  return `${src}${src.includes("?") ? "&" : "?"}tabId=${encodeURIComponent(getTabId())}`;
+  // lang: el idioma del sitio, para que el juego use las voces en ese idioma
+  return `${src}${src.includes("?") ? "&" : "?"}tabId=${encodeURIComponent(getTabId())}&lang=${LOCALE}`;
 }
 
 const HEARTBEAT_MS = 15 * 1000;
@@ -100,9 +134,45 @@ export default function GameFrame({ src, title, nativeWidth, nativeHeight, onBac
   const [scale, setScale] = useState(1);
   const hasFixedResolution = !!(nativeWidth && nativeHeight);
   useReloadWhenStale();
-  const frameSrc = useMemo(() => withTabId(src), [src]);
   const iframeRef = useRef(null);
   const chips = useSelector((state) => state.currentUser?.chips);
+  const userId = useSelector((state) => state.currentUser?.id);
+
+  // El primer token va en la URL; los siguientes se mandan por mensaje (cambiar la URL recargaría el
+  // juego en medio de una partida).
+  const [gameToken, setGameToken] = useState({ value: "", ready: false });
+  // El token renovado más nuevo: si el juego cambia de URL (RoyalSlots al pasar de una tragamonedas a
+  // otra) arranca con este y no con el primero, que puede estar por vencer.
+  const latestTokenRef = useRef("");
+  useEffect(() => {
+    latestTokenRef.current = "";
+    let cancelled = false;
+    setGameToken({ value: "", ready: false });
+    fetchGameToken().then((value) => {
+      if (!cancelled) setGameToken({ value, ready: true });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId || !src) return undefined;
+    const origin = frameOrigin(src);
+    if (!origin) return undefined;
+    const timer = setInterval(async () => {
+      const value = await fetchGameToken();
+      if (!value) return;
+      latestTokenRef.current = value;
+      iframeRef.current?.contentWindow?.postMessage({ type: "royal:game-token", token: value }, origin);
+    }, GAME_TOKEN_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [userId, src]);
+
+  const frameSrc = useMemo(
+    () => withGameToken(withTabId(src), latestTokenRef.current || gameToken.value),
+    [src, gameToken.value]
+  );
 
   // Saldo nuevo (la página lo vuelve a leer cada pocos segundos mientras se juega, ver App.jsx): se
   // le avisa al juego, que lo aplica cuando no está en medio de una jugada (RoyalChipsBridge en
@@ -150,7 +220,7 @@ export default function GameFrame({ src, title, nativeWidth, nativeHeight, onBac
   // first run), so without `src` as a dependency the observer would attach to nothing and `scale`
   // would stay stuck at its initial value once the container finally mounts.
   useEffect(() => {
-    if (!hasFixedResolution || !src) return;
+    if (!hasFixedResolution || !src || !gameToken.ready) return;
     const container = scaleContainerRef.current;
     if (!container) return;
     const updateScale = () => {
@@ -162,7 +232,7 @@ export default function GameFrame({ src, title, nativeWidth, nativeHeight, onBac
     const observer = new ResizeObserver(updateScale);
     observer.observe(container);
     return () => observer.disconnect();
-  }, [hasFixedResolution, nativeWidth, nativeHeight, isFullscreen, src]);
+  }, [hasFixedResolution, nativeWidth, nativeHeight, isFullscreen, src, gameToken.ready]);
 
   return (
     <Box
@@ -173,7 +243,7 @@ export default function GameFrame({ src, title, nativeWidth, nativeHeight, onBac
       display="flex"
       flexDirection="column"
     >
-      {src ? (
+      {src && gameToken.ready ? (
         <Box
           ref={scaleContainerRef}
           flex="1"
