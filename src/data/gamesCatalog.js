@@ -353,8 +353,14 @@ export const GAMES_CATALOG = [
 
 export const getGameBySlug = (slug) => GAMES_CATALOG.find((game) => game.slug === slug);
 
-export const getGameByPlayPath = (path) =>
-  GAMES_CATALOG.find((game) => game.playPath === path || (game.playPathAliases || []).includes(path));
+/** La app (Android) manda su actividad como "app:" + la misma ruta de la web, ej. "app:/game/bingo". */
+export const isAppActivity = (path) => typeof path === "string" && path.startsWith("app:");
+export const stripAppPrefix = (path) => (isAppActivity(path) ? path.slice(4) : path);
+
+export const getGameByPlayPath = (rawPath) => {
+  const path = stripAppPrefix(rawPath);
+  return GAMES_CATALOG.find((game) => game.playPath === path || (game.playPathAliases || []).includes(path));
+};
 
 export const getGamesByCategory = (category) =>
   GAMES_CATALOG.filter((game) => game.category === category);
