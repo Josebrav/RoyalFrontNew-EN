@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@chakra-ui/react';
-import { useLocation, Route, Routes, Navigate } from 'react-router-dom';
+import { useLocation, useNavigate, Route, Routes, Navigate } from 'react-router-dom';
 import { LOCALE } from './i18n/locale';
 import Nav from './components/Nav/nav';
 import Sidebar from './components/Sidebar/sidebar';
@@ -90,6 +90,7 @@ function App() {
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const { currentUser } = useSelector((state) => state);
   const location = useLocation();
+  const navigate = useNavigate();
   useSeo();
   const dispatch = useDispatch();
 
@@ -217,6 +218,9 @@ function App() {
       } else if (type === 'royalgames:chips-release') {
         chipsHoldUntil.current = 0;
         if (currentUser?.email) dispatch(getUserByEmail(currentUser.email)).catch(() => {});
+      } else if (type === 'royalgames:buy-chips') {
+        // Boton "COMPRAR FICHAS" del cartel de fichas insuficientes de la slot.
+        navigate('/chips');
       }
     };
     window.addEventListener('message', onMessage);

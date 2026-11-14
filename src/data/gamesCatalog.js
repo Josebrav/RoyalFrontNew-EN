@@ -162,7 +162,7 @@ export const GAMES_CATALOG = [
     slug: "gomitas",
     name: "Gomitas Espaciales",
     category: "slots",
-    status: "soon",
+    status: "active",
     image: gomitasImage,
     icon: "rocket_launch",
     players: 0,

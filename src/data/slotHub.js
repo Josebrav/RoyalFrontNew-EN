@@ -41,7 +41,7 @@ export const HUB_SLOTS = {
   },
   gomitas: {
     title: "Gomitas Espaciales",
-    url: withPlayer("https://gomitasespaciales.s3.us-east-2.amazonaws.com/gomitas/index.html"),
+    url: withPlayer("https://gomitas.s3.us-east-2.amazonaws.com/gomitas/index.html"),
   },
   gemaofgold: {
     title: "Gema of Gold",
