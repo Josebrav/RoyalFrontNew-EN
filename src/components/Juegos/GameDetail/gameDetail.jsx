@@ -86,7 +86,7 @@ export default function GameDetail() {
           fallbackIcon={game.icon}
           alt={game.name}
           className="w-full h-full object-cover"
-          recommendedSize="600×800px aprox. (vertical), JPG o PNG"
+          recommendedSize="1200×400px aprox. (horizontal), JPG o PNG"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 md:p-8">

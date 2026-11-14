@@ -4,6 +4,7 @@ import pachinkaImage from "../assets/rpachinka2.png";
 import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
+import bichoImage from "../assets/bicho.jpg";
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
 import dominoImage from "../assets/domino.png";
 
@@ -158,6 +159,18 @@ export const GAMES_CATALOG = [
     icon: "pets",
     description:
       "La tradicional lotería de animales llega a RoyalGames. Elige tu bicho de la suerte y apuesta a que sea el ganador del sorteo.",
+  },
+  {
+    slug: "bicho",
+    name: "Juego del Bicho",
+    category: "casino",
+    status: "soon",
+    image: bichoImage,
+    icon: "pets",
+    players: 0,
+    playPath: "/game/bicho",
+    description:
+      "Elegí entre 25 animales y esperá el sorteo: cada minuto gira el bolillero para todos. Si sale tu animal, ganás 24 veces lo apostado.",
   },
   {
     slug: "royal-ruleta",

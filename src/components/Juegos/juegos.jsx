@@ -84,7 +84,7 @@ export default function GameGrid() {
               >
                 <div className={`aspect-square overflow-hidden flex items-center justify-center bg-gradient-to-br from-surface-container-high to-surface-container-low ${!isActive ? "grayscale" : ""}`}>
                   <EditableImage
-                    contentKey={`games.${game.slug}.cover`}
+                    contentKey={`games.${game.slug}.thumbnail`}
                     fallbackSrc={game.image}
                     fallbackIcon={game.icon}
                     alt={game.name}

@@ -85,6 +85,10 @@ export const GAME_SEO = {
     title: "Gema of Gold: tragamonedas de gemas gratis | RoyalJuegos",
     description: "Gema of Gold, la tragamonedas de gemas y oro con premios y bonos. Jugá gratis online con fichas de regalo.",
   },
+  bicho: {
+    title: "Juego del Bicho online gratis | RoyalJuegos",
+    description: "Jugá al Juego del Bicho online gratis: 25 animales, un sorteo cada minuto para todos y premios de 24 veces lo apostado.",
+  },
   minas: {
     title: "Minas (Mines) online gratis | RoyalJuegos",
     description: "Jugá a Minas (Mines) online gratis: elegí casillas, evitá las bombas y multiplicá tus fichas. Retirate cuando quieras.",

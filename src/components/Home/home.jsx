@@ -402,7 +402,7 @@ export default function Home() {
                   >
                     <div className="aspect-[3/4] overflow-hidden">
                       <EditableImage
-                        contentKey={`games.${game.slug}.cover`}
+                        contentKey={`games.${game.slug}.thumbnail`}
                         fallbackSrc={game.image}
                         fallbackIcon={game.icon}
                         alt={game.name}
