@@ -96,6 +96,17 @@ export const formatNumber = (n) => numberFmt.format(Number(n) || 0);
 /** Título en el idioma del sitio (el backend lo manda en español; si falta la métrica, se usa ese). */
 export const missionTitle = (m) => TITLES[LOCALE]?.[m.metric]?.(formatNumber(m.target)) || m.title;
 
+const dateFmt = new Intl.DateTimeFormat(LOCALE === "en" ? "en-US" : LOCALE === "pt" ? "pt-BR" : "es-AR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+/** Fecha y hora exactas de la renovación, en la hora del jugador: "lunes, 16 de noviembre, 0:00". */
+export const resetDate = (resetsAt) => dateFmt.format(new Date(resetsAt));
+
 /** "5 h 12 min" hasta la renovación. */
 export function timeLeft(resetsAt, now = Date.now()) {
   const ms = Math.max(0, new Date(resetsAt).getTime() - now);

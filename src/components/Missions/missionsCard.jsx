@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import useMissions, { timeLeft } from "../../utils/useMissions";
+import useMissions, { resetDate, timeLeft } from "../../utils/useMissions";
 import MissionItem from "./missionItem";
 
 /** Tarjeta del inicio: las misiones de hoy, para que el jugador vea qué le falta apenas entra. */
@@ -22,7 +22,9 @@ export default function MissionsCard() {
             </span>
           )}
         </h3>
-        <span className="text-[0.6875rem] text-on-surface-variant">{timeLeft(data.daily.resetsAt)}</span>
+        <span className="text-[0.6875rem] text-on-surface-variant" title={resetDate(data.daily.resetsAt)}>
+          Se renuevan en {timeLeft(data.daily.resetsAt)}
+        </span>
       </div>
       <div className="flex flex-col gap-2">
         {data.daily.missions.map((m) => (

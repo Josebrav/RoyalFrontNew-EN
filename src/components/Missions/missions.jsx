@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import useMissions, { timeLeft } from "../../utils/useMissions";
+import useMissions, { resetDate, timeLeft } from "../../utils/useMissions";
 import MissionItem from "./missionItem";
 
 function Section({ title, icon, period, now }) {
@@ -12,9 +12,12 @@ function Section({ title, icon, period, now }) {
           <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
           {title}
         </h2>
-        <span className="text-xs text-on-surface-variant flex items-center gap-1">
+        <span className="text-xs text-on-surface-variant flex items-center gap-1" title={resetDate(period.resetsAt)}>
           <span className="material-symbols-outlined text-[16px]">schedule</span>
-          Se renuevan en {timeLeft(period.resetsAt, now)}
+          <span>
+            Se renuevan en <b className="text-white">{timeLeft(period.resetsAt, now)}</b>
+            <span className="hidden sm:inline"> · {resetDate(period.resetsAt)}</span>
+          </span>
         </span>
       </div>
       <div className="flex flex-col gap-3">
@@ -47,7 +50,8 @@ export default function Missions() {
             Misiones
           </h1>
           <p className="text-on-surface-variant mt-2 max-w-2xl">
-            Cumplí las misiones jugando y cobrá fichas gratis. Las diarias cambian todos los días y las semanales cada lunes.
+            Cumplí las misiones jugando y cobrá fichas gratis. Las diarias cambian todos los días a la medianoche
+            (hora de Argentina) y las semanales cada lunes a la misma hora.
             Si no cobrás una misión cumplida antes de que se renueve, se pierde.
           </p>
         </header>
