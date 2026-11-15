@@ -5,11 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 import { fetchConversations } from "../../redux/actions/index";
 import { t } from "../../i18n/strings";
+import useMissions from "../../utils/useMissions";
 
 export default function Sidebar() {
   const dispatch = useDispatch();
   const { currentUser, messages } = useSelector((state) => state);
   const location = useLocation();
+  // Misiones cumplidas sin cobrar: globito en "Misiones" (se vuelve a mirar al cambiar de página).
+  const { data: missions } = useMissions(currentUser?.id, location.pathname);
 
   // Mods ven el panel de admin igual que los admins (todo excepto gestión de roles).
   const canAccessAdminPanel = currentUser?.role === "admin" || currentUser?.role === "mod";
@@ -38,6 +41,7 @@ export default function Sidebar() {
   const accountItems = [
     { to: "/chips", icon: "paid", label: t("sidebar.comprarFichas"), color: "#4caf7d" },
     { to: "/chips?tab=history", icon: "receipt_long", label: t("sidebar.historial"), color: "#4f8fe0" },
+    { to: "/misiones", icon: "flag", label: t("sidebar.misiones"), badge: missions?.claimable || 0, color: "#e6c364" },
   ];
 
   const socialItems = [
