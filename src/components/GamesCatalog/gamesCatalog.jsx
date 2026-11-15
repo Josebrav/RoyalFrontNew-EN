@@ -7,7 +7,14 @@ function GameRow({ game, compact }) {
   const navigate = useNavigate();
   const isActive = game.status === "active";
   const override = useSelector((state) => state.siteContent[`games.${game.slug}.thumbnail`]);
-  const thumbnailSrc = override?.type === "image" && override.imageUrl ? override.imageUrl : game.image;
+  const cover = useSelector((state) => state.siteContent[`games.${game.slug}.cover`]);
+  // Sin miniatura propia, la portada que ya se habia subido; si no, la imagen del juego.
+  const thumbnailSrc =
+    override?.type === "image" && override.imageUrl
+      ? override.imageUrl
+      : cover?.type === "image" && cover.imageUrl
+        ? cover.imageUrl
+        : game.image;
 
   return (
     <button

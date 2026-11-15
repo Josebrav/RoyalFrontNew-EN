@@ -48,6 +48,12 @@ export default function Home() {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const { currentUser } = useSelector((state) => state);
+  // Sin miniatura propia, las tarjetas usan la portada que ya se habia subido (games.<slug>.cover).
+  const siteContent = useSelector((state) => state.siteContent);
+  const cardFallback = (game) => {
+    const cover = siteContent?.[`games.${game.slug}.cover`];
+    return cover?.type === "image" && cover.imageUrl ? cover.imageUrl : game.image;
+  };
   const orderedGames = useOrderedGames();
   // Al recargar la página, restaurar la sesión (canjear la cookie httpOnly por un access token
   // nuevo) es async — mientras tanto currentUser?.id todavía es falsy en Redux, así que sin este
@@ -421,7 +427,7 @@ export default function Home() {
                     <div className="aspect-[3/4] overflow-hidden">
                       <EditableImage
                         contentKey={`games.${game.slug}.thumbnail`}
-                        fallbackSrc={game.image}
+                        fallbackSrc={cardFallback(game)}
                         fallbackIcon={game.icon}
                         alt={game.name}
                         className="w-full h-full object-cover"
