@@ -53,6 +53,10 @@ export const GAME_SEO = {
     title: "Blackjack online gratis con mesas en vivo | RoyalJuegos",
     description: "Jugá blackjack online gratis en mesas compartidas con otros jugadores: vencé al crupier sin pasarte de 21. Fichas de regalo y chat en vivo.",
   },
+  buraco: {
+    title: "Buraco online gratis contra jugadores reales | RoyalJuegos",
+    description: "Jugá al buraco online gratis en mesas 1 vs 1 o en parejas 2 vs 2, con canastas, muertos y chat en vivo. Armá tu mesa con las reglas que prefieras.",
+  },
   domino: {
     title: "Dominó online gratis contra jugadores reales | RoyalJuegos",
     description: "Jugá dominó online gratis en mesas con jugadores reales, con chat y salas por apuesta. Partidas rápidas desde el celular o la PC.",
@@ -80,6 +84,18 @@ export const GAME_SEO = {
   gildedcobra: {
     title: "Gilded Cobra: tragamonedas del antiguo Egipto gratis | RoyalJuegos",
     description: "Gilded Cobra, la tragamonedas del antiguo Egipto con 720 formas de ganar, tiradas gratis y bono de huevos. Jugá gratis online.",
+  },
+  jokerwilds: {
+    title: "Joker Wilds: tragamonedas del bufón gratis | RoyalJuegos",
+    description: "Joker Wilds, la tragamonedas del bufón con coronas, cofres y gemas: 5 Joker pagan 2.000 veces la apuesta. Jugá gratis online.",
+  },
+  sweettreats: {
+    title: "Sweet Treats: tragamonedas de bombones en cascada gratis | RoyalJuegos",
+    description: "Sweet Treats, la tragamonedas de chocolates en cascada: 4 o más iguales explotan, multiplicadores y giros gratis. Jugá gratis online.",
+  },
+  gomitas: {
+    title: "Gomitas Espaciales: tragamonedas de ositos de gomita gratis | RoyalJuegos",
+    description: "Gomitas Espaciales, la tragamonedas neón de ositos de gomita en el espacio: 243 formas de ganar, giros gratis con premios x3 y la máquina de gomitas. Jugá gratis online.",
   },
   "gema-of-gold": {
     title: "Gema of Gold: tragamonedas de gemas gratis | RoyalJuegos",

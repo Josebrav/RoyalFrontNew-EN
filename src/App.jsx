@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@chakra-ui/react';
-import { useLocation, Route, Routes } from 'react-router-dom';
+import { useLocation, useNavigate, Route, Routes, Navigate } from 'react-router-dom';
+import { LOCALE } from './i18n/locale';
 import Nav from './components/Nav/nav';
 import Sidebar from './components/Sidebar/sidebar';
 import Footer from './components/footer/footer';
@@ -15,10 +16,12 @@ import News from './components/News/news';
 import RankSystem from './components/RankSystem/rankSystem';
 import RankUpNotice from './components/RankUpNotice/rankUpNotice';
 import OfferBanner from './components/OfferBanner/offerBanner';
+import FeaturedNews from './components/FeaturedNews/featuredNews';
 import AdminOffers from './components/AdminPanel/Offers/offers';
 import regaloBienvenida from '../src/assets/regalobienvenida.png';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchSiteContent, getUserByEmail } from './redux/actions';
+import { HUB_ORIGINS } from './data/slotHub';
 import TermsAndConditions from './components/termsyConds/terminosYCondiciones';
 import axios from 'axios';
 import Diamantes from './components/Juegos/Diamantes/diamantes';
@@ -31,8 +34,12 @@ import SugarCalavera from './components/Juegos/SugarCalavera/sugarcalavera';
 import FuriaOlimpo from './components/Juegos/FuriaOlimpo/furiaolimpo';
 import Bicho from './components/Juegos/Bicho/bicho';
 import GildedCobra from './components/Juegos/GildedCobra/gildedcobra';
+import JokerWilds from './components/Juegos/JokerWilds/jokerwilds';
+import SweetTreats from './components/Juegos/SweetTreats/sweettreats';
+import Gomitas from './components/Juegos/Gomitas/gomitas';
 import Domino from './components/Juegos/Domino/domino';
 import Parchis from './components/Juegos/Parchis/parchis';
+import Buraco from './components/Juegos/Buraco/buraco';
 import GemaOfGold from './components/Juegos/GemaOfGold/gemaofgold';
 import RoyalRuleta from './components/Juegos/RoyalRuleta/royalruleta';
 import Blackjack from './components/Juegos/Blackjack/blackjack';
@@ -57,6 +64,7 @@ import BingoBots from './components/AdminPanel/BingoBots/bingoBots';
 import MinesBots from './components/AdminPanel/MinesBots/minesBots';
 import DominoBots from './components/AdminPanel/DominoBots/dominoBots';
 import ParchisBots from './components/AdminPanel/ParchisBots/parchisBots';
+import BuracoBots from './components/AdminPanel/BuracoBots/buracoBots';
 import UnityBots from './components/AdminPanel/UnityBots/unityBots';
 import Trophies from './components/AdminPanel/Trophies/trophies';
 import GameImages from './components/AdminPanel/GameImages/gameImages';
@@ -77,11 +85,13 @@ import Privacidad from './components/Legal/privacidad';
 import EliminarCuenta from './components/Legal/eliminarCuenta';
 import Cumplimiento from './components/Legal/cumplimiento';
 import Careers from './components/Careers/careers';
+import GlobalChat from './components/GlobalChat/globalChat';
 
 function App() {
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const { currentUser } = useSelector((state) => state);
   const location = useLocation();
+  const navigate = useNavigate();
   useSeo();
   const dispatch = useDispatch();
 
@@ -194,10 +204,37 @@ function App() {
   // comentario de arriba), nunca se entera de que las fichas cambiaron. Sondeamos cada pocos
   // segundos nada más que en esas rutas para que la nav siga el saldo casi en vivo mientras se
   // juega/compra.
+  // Las slots acreditan el premio (incluido el de todas las tiradas gratis) en el momento del giro,
+  // así que el sondeo mostraba el premio en la nav antes de que terminara de animarse. El juego
+  // avisa "royalgames:chips-hold" al girar y "royalgames:chips-release" cuando ya mostró el saldo
+  // final: mientras tanto la nav no se actualiza (con un tope por si el juego se cierra a la mitad).
+  const chipsHoldUntil = useRef(0);
   useEffect(() => {
+    const MAX_HOLD_MS = 4 * 60 * 1000;
+    const onMessage = (event) => {
+      if (!HUB_ORIGINS.has(event.origin)) return;
+      const type = event.data && typeof event.data === 'object' ? event.data.type : null;
+      if (type === 'royalgames:chips-hold') {
+        chipsHoldUntil.current = Date.now() + MAX_HOLD_MS;
+      } else if (type === 'royalgames:chips-release') {
+        chipsHoldUntil.current = 0;
+        if (currentUser?.email) dispatch(getUserByEmail(currentUser.email)).catch(() => {});
+      } else if (type === 'royalgames:buy-chips') {
+        // Boton "COMPRAR FICHAS" del cartel de fichas insuficientes de la slot.
+        navigate('/chips');
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.email]);
+
+  useEffect(() => {
+    chipsHoldUntil.current = 0; // al cambiar de página se suelta cualquier congelamiento
     const isGameOrRoyalStore = location.pathname.includes('/game') || location.pathname === '/royalstore';
     if (!currentUser?.email || !isGameOrRoyalStore) return;
     const interval = setInterval(() => {
+      if (Date.now() < chipsHoldUntil.current) return; // hay una tirada animándose
       dispatch(getUserByEmail(currentUser.email)).catch(() => {});
     }, 3000);
     return () => clearInterval(interval);
@@ -254,6 +291,7 @@ function App() {
             <Route path="/admin/mines-bots" element={<ProtectedRoute><MinesBots /></ProtectedRoute>} />
             <Route path="/admin/domino-bots" element={<ProtectedRoute><DominoBots /></ProtectedRoute>} />
             <Route path="/admin/parchis-bots" element={<ProtectedRoute><ParchisBots /></ProtectedRoute>} />
+            <Route path="/admin/buraco-bots" element={<ProtectedRoute><BuracoBots /></ProtectedRoute>} />
             <Route path="/admin/unity-bots" element={<ProtectedRoute><UnityBots /></ProtectedRoute>} />
             <Route path="/admin/trophies" element={<ProtectedRoute><Trophies /></ProtectedRoute>} />
             <Route path="/admin/game-images" element={<ProtectedRoute><GameImages /></ProtectedRoute>} />
@@ -275,10 +313,16 @@ function App() {
             <Route path="/game/furiaolimpo" element={<RequireAuth><FuriaOlimpo /></RequireAuth>} />
             <Route path="/game/bicho" element={<RequireAuth><Bicho /></RequireAuth>} />
             <Route path="/game/gildedcobra" element={<RequireAuth><GildedCobra /></RequireAuth>} />
+            <Route path="/game/jokerwilds" element={<RequireAuth><JokerWilds /></RequireAuth>} />
+            <Route path="/game/sweettreats" element={<RequireAuth><SweetTreats /></RequireAuth>} />
+            <Route path="/game/gomitas" element={<RequireAuth><Gomitas /></RequireAuth>} />
             <Route path="/game/domino" element={<RequireAuth><Domino /></RequireAuth>} />
             <Route path="/game/parchis" element={<RequireAuth><Parchis /></RequireAuth>} />
+            <Route path="/game/buraco" element={<RequireAuth><Buraco /></RequireAuth>} />
             <Route path="/game/gemaofgold" element={<RequireAuth><GemaOfGold /></RequireAuth>} />
-            <Route path="/game/royalruleta" element={<RequireAuth><RoyalRuleta /></RequireAuth>} />
+            {/* En portugues la ruleta va en /game/royalroleta; la direccion vieja lleva a la nueva */}
+            <Route path="/game/royalruleta" element={LOCALE === "pt" ? <Navigate to="/game/royalroleta" replace /> : <RequireAuth><RoyalRuleta /></RequireAuth>} />
+            <Route path="/game/royalroleta" element={<RequireAuth><RoyalRuleta /></RequireAuth>} />
             <Route path="/game/blackjack" element={<RequireAuth><Blackjack /></RequireAuth>} />
             <Route path="/royalstore" element={<RoyalStore />} />
             <Route path="/amigos" element={<Friends />} />
@@ -296,8 +340,10 @@ function App() {
           {!location.pathname.includes('/game') && <Footer />}
           </div>
         </div>
+        <GlobalChat />
         <RankUpNotice />
         <OfferBanner />
+        <FeaturedNews />
         {showWelcomeGift && currentUser?.id && createPortal(
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"

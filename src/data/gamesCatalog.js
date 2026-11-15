@@ -1,12 +1,20 @@
+import { LOCALE } from "../i18n/locale";
 import rjImage from "../assets/rj.png";
 import minasImage from "../assets/minas2.png";
 import pachinkaImage from "../assets/rpachinka2.png";
 import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
+<<<<<<< HEAD
 import bichoImage from "../assets/bicho.jpg";
+=======
+import buracoImage from "../assets/buraco.jpg";
+>>>>>>> 7f37c8c5854940b2686066c35a748c4ae0087bf9
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
 import dominoImage from "../assets/domino.png";
+import jokerWildsImage from "../assets/jokerwilds.jpg";
+import sweetTreatsImage from "../assets/sweettreats.jpg";
+import gomitasImage from "../assets/gomitas.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
 // la categoría necesita notarse de un vistazo (ej. la grilla de "Juegos Populares" del Home) en
@@ -131,6 +139,42 @@ export const GAMES_CATALOG = [
       "Tragamonedas del antiguo Egipto con rodillos escalonados y 720 formas de ganar. Tres scatter dan tiradas gratis y el bonus de los huevos suma multiplicadores.",
   },
   {
+    slug: "jokerwilds",
+    name: "Joker Wilds",
+    category: "slots",
+    status: "active",
+    image: jokerWildsImage,
+    icon: "theater_comedy",
+    players: 0,
+    playPath: "/game/jokerwilds",
+    description:
+      "Tragamonedas del bufón: 5 rodillos con Joker, coronas, cofres y gemas. Cada símbolo paga en rodillos seguidos desde el primero, en cualquier fila; 5 Joker pagan 2.000 veces la apuesta.",
+  },
+  {
+    slug: "sweettreats",
+    name: "Sweet Treats",
+    category: "slots",
+    status: "active",
+    image: sweetTreatsImage,
+    icon: "cake",
+    players: 0,
+    playPath: "/game/sweettreats",
+    description:
+      "Tragamonedas de bombones en cascada: 4 o más iguales en cualquier lugar explotan y caen nuevos. Los multiplicadores multiplican el premio y 3 FREE SPIN dan 10 giros gratis.",
+  },
+  {
+    slug: "gomitas",
+    name: "Gomitas Espaciales",
+    category: "slots",
+    status: "active",
+    image: gomitasImage,
+    icon: "rocket_launch",
+    players: 0,
+    playPath: "/game/gomitas",
+    description:
+      "Tragamonedas neón de ositos de gomita en el espacio: 243 formas de ganar. 3 platillos dan giros gratis con premios x3 y 3 máquinas abren el bonus de la máquina de gomitas.",
+  },
+  {
     slug: "bingo",
     name: "Royal Bingo",
     category: "bingo",
@@ -180,7 +224,9 @@ export const GAMES_CATALOG = [
     image: ruletaImage,
     icon: "donut_large",
     players: 1120,
-    playPath: "/game/royalruleta",
+    // En el sitio en portugues la direccion es /game/royalroleta (las dos abren la ruleta)
+    playPath: LOCALE === "pt" ? "/game/royalroleta" : "/game/royalruleta",
+    playPathAliases: ["/game/royalruleta", "/game/royalroleta"],
     description:
       "Ruleta europea con mesas compartidas. Apuesta a tu número, color o docena favorita y deja girar la rueda.",
   },
@@ -236,8 +282,11 @@ export const GAMES_CATALOG = [
     slug: "buraco",
     name: "Buraco",
     category: "cartas",
-    status: "soon",
+    status: "active",
+    image: buracoImage,
     icon: "extension",
+    players: 0,
+    playPath: "/game/buraco",
     description:
       "Armá tríos y escaleras antes que tus rivales en este clásico de mesa sudamericano, ahora online contra otros jugadores de RoyalGames.",
   },
@@ -333,7 +382,14 @@ export const GAMES_CATALOG = [
 
 export const getGameBySlug = (slug) => GAMES_CATALOG.find((game) => game.slug === slug);
 
-export const getGameByPlayPath = (path) => GAMES_CATALOG.find((game) => game.playPath === path);
+/** La app (Android) manda su actividad como "app:" + la misma ruta de la web, ej. "app:/game/bingo". */
+export const isAppActivity = (path) => typeof path === "string" && path.startsWith("app:");
+export const stripAppPrefix = (path) => (isAppActivity(path) ? path.slice(4) : path);
+
+export const getGameByPlayPath = (rawPath) => {
+  const path = stripAppPrefix(rawPath);
+  return GAMES_CATALOG.find((game) => game.playPath === path || (game.playPathAliases || []).includes(path));
+};
 
 export const getGamesByCategory = (category) =>
   GAMES_CATALOG.filter((game) => game.category === category);
