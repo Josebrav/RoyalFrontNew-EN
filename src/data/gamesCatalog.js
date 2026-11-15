@@ -5,11 +5,8 @@ import pachinkaImage from "../assets/rpachinka2.png";
 import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
-<<<<<<< HEAD
 import bichoImage from "../assets/bicho.jpg";
-=======
 import buracoImage from "../assets/buraco.jpg";
->>>>>>> 7f37c8c5854940b2686066c35a748c4ae0087bf9
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
 import dominoImage from "../assets/domino.png";
 import jokerWildsImage from "../assets/jokerwilds.jpg";
