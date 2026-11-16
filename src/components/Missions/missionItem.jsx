@@ -23,6 +23,22 @@ const METRIC_ICON = {
   bicho_bets: "pets",
 };
 
+/** Color del cuadrito del icono, segun lo que pide la mision. */
+const METRIC_COLOR = {
+  plays: "#8b5cf6",
+  wagered: "#f59e0b",
+  slot_spins: "#ec4899",
+  domino_hands: "#3b82f6",
+  domino_wins: "#eab308",
+  parchis_matches: "#22c55e",
+  parchis_wins: "#eab308",
+  bingo_cards: "#06b6d4",
+  mines_rounds: "#14b8a6",
+  ruleta_rounds: "#ef4444",
+  blackjack_hands: "#10b981",
+  bicho_bets: "#84cc16",
+};
+
 /** Una misión: progreso, premio y botón de Cobrar (si está cumplida) o de Jugar. */
 export default function MissionItem({ mission, compact = false }) {
   const navigate = useNavigate();
@@ -31,6 +47,8 @@ export default function MissionItem({ mission, compact = false }) {
   const [claiming, setClaiming] = useState(false);
   const pct = Math.min(100, Math.round((mission.progress / mission.target) * 100));
   const game = mission.gameSlug ? getGameBySlug(mission.gameSlug) : null;
+  const ready = mission.completed && !mission.claimed;
+  const color = ready ? "#22c55e" : METRIC_COLOR[mission.metric] || "#8b5cf6";
 
   const handleClaim = async () => {
     if (claiming) return;
@@ -55,24 +73,38 @@ export default function MissionItem({ mission, compact = false }) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border p-3 ${
-        mission.claimed ? "border-outline-variant/20 opacity-60" : mission.completed ? "border-primary/60 bg-primary/5" : "border-outline-variant/20"
-      }`}
+      className={`flex items-center gap-3 rounded-xl border p-3 ${mission.claimed ? "opacity-60" : ""}`}
+      style={{
+        borderColor: ready ? "rgba(34,197,94,0.6)" : `${color}33`,
+        background: ready
+          ? "linear-gradient(90deg, rgba(34,197,94,0.16), rgba(250,204,21,0.06))"
+          : `linear-gradient(90deg, ${color}14, rgba(255,255,255,0.01))`,
+        boxShadow: ready ? "0 0 16px rgba(34,197,94,0.25)" : "none",
+      }}
     >
       <span
-        className={`material-symbols-outlined flex-shrink-0 ${compact ? "text-[22px]" : "text-[28px]"} ${mission.completed ? "text-primary" : "text-on-surface-variant"}`}
-        style={{ fontVariationSettings: "'FILL' 1" }}
+        className={`flex-shrink-0 inline-flex items-center justify-center rounded-xl ${compact ? "w-8 h-8" : "w-11 h-11"}`}
+        style={{ background: `linear-gradient(135deg, ${color}, ${color}99)`, boxShadow: `0 0 12px ${color}66` }}
       >
-        {mission.claimed ? "task_alt" : METRIC_ICON[mission.metric] || "flag"}
+        <span className={`material-symbols-outlined text-white ${compact ? "text-[18px]" : "text-[24px]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+          {mission.claimed ? "task_alt" : METRIC_ICON[mission.metric] || "flag"}
+        </span>
       </span>
       <div className="min-w-0 flex-1">
         <p className={`font-bold text-white ${compact ? "text-xs" : "text-sm"} leading-snug`}>{missionTitle(mission)}</p>
-        <div className="mt-1.5 w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden border border-outline-variant/10">
-          <div className={`h-full ${mission.completed ? "royal-gold-gradient" : "bg-sky-500"}`} style={{ width: `${pct}%` }} />
+        <div className="mt-1.5 w-full bg-[#0a0b18] h-2 rounded-full overflow-hidden border border-white/5">
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${pct}%`,
+              background: mission.completed ? "linear-gradient(90deg, #22c55e, #facc15)" : `linear-gradient(90deg, ${color}, #22d3ee)`,
+              boxShadow: pct > 0 ? `0 0 8px ${mission.completed ? "#22c55e" : color}` : "none",
+            }}
+          />
         </div>
         <p className="mt-1 text-[0.6875rem] text-on-surface-variant tabular-nums">
           {formatNumber(mission.progress)} / {formatNumber(mission.target)}
-          <span className="text-primary font-bold"> · +{formatNumber(mission.reward)} fichas</span>
+          <span className="text-amber-300 font-bold"> · +{formatNumber(mission.reward)} fichas</span>
         </p>
       </div>
       {mission.claimed ? (
@@ -82,7 +114,7 @@ export default function MissionItem({ mission, compact = false }) {
           type="button"
           onClick={handleClaim}
           disabled={claiming}
-          className="royal-gold-gradient px-3 py-1.5 rounded-lg text-[#0A0A0F] font-bold text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 disabled:opacity-60"
+          className="bg-gradient-to-r from-[#22c55e] to-[#facc15] px-3 py-1.5 rounded-lg text-[#0A0A0F] font-black text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 disabled:opacity-60 shadow-[0_0_14px_rgba(34,197,94,0.55)]"
         >
           Cobrar
         </button>
@@ -90,7 +122,7 @@ export default function MissionItem({ mission, compact = false }) {
         <button
           type="button"
           onClick={() => navigate(game?.playPath || "/juegos")}
-          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110"
+          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-bold text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 shadow-[0_0_12px_rgba(139,92,246,0.45)]"
         >
           Jugar
         </button>
