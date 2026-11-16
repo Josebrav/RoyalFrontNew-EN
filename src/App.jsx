@@ -373,7 +373,7 @@ function App() {
               <div className="space-y-2 relative z-10">
                 <h2 className="font-headline-md text-headline-md text-white">¡Felicidades!</h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Has ganado 100.000 fichas por ser uno de los primeros 100 usuarios.
+                  Has ganado 100.000 fichas de regalo de bienvenida.
                 </p>
               </div>
 

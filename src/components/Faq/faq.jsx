@@ -12,7 +12,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "¿Cómo consigo fichas?",
-    a: "Los primeros 100 usuarios reciben un bono de bienvenida automático. Después de eso, podés comprar paquetes de fichas desde \"Comprar Fichas\".",
+    a: "Todos los usuarios nuevos reciben 100.000 fichas de bienvenida al registrarse. Después de eso, podés comprar paquetes de fichas desde \"Comprar Fichas\".",
   },
   {
     q: "¿Qué es el sistema de rangos (Bronce, Plata, Oro, Platino, Diamante)?",
