@@ -93,6 +93,10 @@ export const GAME_SEO = {
     title: "Sweet Treats: tragamonedas de bombones en cascada gratis | RoyalJuegos",
     description: "Sweet Treats, la tragamonedas de chocolates en cascada: 4 o más iguales explotan, multiplicadores y giros gratis. Jugá gratis online.",
   },
+  gamerzone: {
+    title: "Gamer Zone: tragamonedas arcade neón gratis | RoyalJuegos",
+    description: "Gamer Zone, la tragamonedas arcade neón: 243 formas de ganar, giros gratis con WILD expansivo que cubre todo el rodillo. Jugá gratis online.",
+  },
   oceanriches: {
     title: "Ocean Riches: tragamonedas de pesca gratis | RoyalJuegos",
     description: "Ocean Riches, la tragamonedas de pesca en el fondo del mar: peces con premio, el pescador que los recoge, giros gratis con marea y el bonus del cofre. Jugá gratis online.",

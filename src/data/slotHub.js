@@ -47,6 +47,10 @@ export const HUB_SLOTS = {
     title: "Ocean Riches",
     url: withPlayer("https://oceanrich.s3.us-east-2.amazonaws.com/oceanriches/index.html"),
   },
+  gamerzone: {
+    title: "Gamer Zone",
+    url: withPlayer("https://gamerzoneroyal.s3.us-east-2.amazonaws.com/gamerzone/index.html"),
+  },
   gemaofgold: {
     title: "Gema of Gold",
     url: withPlayer("https://gemaofgold.s3.us-east-2.amazonaws.com/Gemaofgold/index.html"),

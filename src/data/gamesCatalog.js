@@ -13,6 +13,7 @@ import jokerWildsImage from "../assets/jokerwilds.jpg";
 import sweetTreatsImage from "../assets/sweettreats.jpg";
 import gomitasImage from "../assets/gomitas.jpg";
 import oceanRichesImage from "../assets/oceanriches.jpg";
+import gamerZoneImage from "../assets/gamerzone.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
 // la categoría necesita notarse de un vistazo (ej. la grilla de "Juegos Populares" del Home) en
@@ -183,6 +184,18 @@ export const GAMES_CATALOG = [
     playPath: "/game/oceanriches",
     description:
       "Tragamonedas de pesca en el fondo del mar: 243 formas de ganar. Los peces traen premios y el pescador los recoge; el pelícano los multiplica, la marea sube en los giros gratis y 3 cofres abren la pesca en el fondo.",
+  },
+  {
+    slug: "gamerzone",
+    name: "Gamer Zone",
+    category: "slots",
+    status: "active",
+    image: gamerZoneImage,
+    icon: "sports_esports",
+    players: 0,
+    playPath: "/game/gamerzone",
+    description:
+      "Tragamonedas neón arcade: 243 formas de ganar con controles, consolas y máquinas de arcade. 3 estrellas SCATTER dan giros gratis donde el WILD se expande y cubre todo el rodillo.",
   },
   {
     slug: "bingo",
