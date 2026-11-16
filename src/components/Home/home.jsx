@@ -16,6 +16,7 @@ import { formatChips, swalThemeConfig } from "../../utils/formatters";
 import GamesCatalog from "../GamesCatalog/gamesCatalog";
 import DailySpinModal from "../DailySpin/DailySpinModal";
 import DailyBonusModal from "../DailyBonus/DailyBonusModal";
+import MissionsCard from "../Missions/missionsCard";
 import EditableText from "../ui/EditableText";
 import EditableImage from "../ui/EditableImage";
 import BannerCarousel from "../ui/BannerCarousel";
@@ -609,6 +610,8 @@ export default function Home() {
                   )}
                 </div>
               </div>
+
+              <MissionsCard />
 
               {/* Tarjeta de Giro Diario VIP oculta a pedido (ver handleClaimDailySpin,
                   DailySpinModal y GET /daily-spin/status, todo intacto por si se retoma) */}

@@ -14,6 +14,7 @@ import LogOut from './components/Logout/logout';
 import GameGrid from './components/Juegos/juegos';
 import News from './components/News/news';
 import RankSystem from './components/RankSystem/rankSystem';
+import Missions from './components/Missions/missions';
 import RankUpNotice from './components/RankUpNotice/rankUpNotice';
 import OfferBanner from './components/OfferBanner/offerBanner';
 import FeaturedNews from './components/FeaturedNews/featuredNews';
@@ -297,6 +298,7 @@ function App() {
             <Route path="/admin/game-images" element={<ProtectedRoute><GameImages /></ProtectedRoute>} />
             <Route path="/noticias" element={<News />} />
             <Route path="/rangos" element={<RankSystem />} />
+            <Route path="/misiones" element={<RequireAuth><Missions /></RequireAuth>} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
             <Route path="/privacidad" element={<Privacidad />} />
