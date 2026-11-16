@@ -38,6 +38,7 @@ import GildedCobra from './components/Juegos/GildedCobra/gildedcobra';
 import JokerWilds from './components/Juegos/JokerWilds/jokerwilds';
 import SweetTreats from './components/Juegos/SweetTreats/sweettreats';
 import Gomitas from './components/Juegos/Gomitas/gomitas';
+import OceanRiches from './components/Juegos/OceanRiches/oceanriches';
 import Domino from './components/Juegos/Domino/domino';
 import Parchis from './components/Juegos/Parchis/parchis';
 import Buraco from './components/Juegos/Buraco/buraco';
@@ -318,6 +319,7 @@ function App() {
             <Route path="/game/jokerwilds" element={<RequireAuth><JokerWilds /></RequireAuth>} />
             <Route path="/game/sweettreats" element={<RequireAuth><SweetTreats /></RequireAuth>} />
             <Route path="/game/gomitas" element={<RequireAuth><Gomitas /></RequireAuth>} />
+            <Route path="/game/oceanriches" element={<RequireAuth><OceanRiches /></RequireAuth>} />
             <Route path="/game/domino" element={<RequireAuth><Domino /></RequireAuth>} />
             <Route path="/game/parchis" element={<RequireAuth><Parchis /></RequireAuth>} />
             <Route path="/game/buraco" element={<RequireAuth><Buraco /></RequireAuth>} />

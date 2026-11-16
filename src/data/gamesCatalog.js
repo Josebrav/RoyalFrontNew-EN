@@ -12,6 +12,7 @@ import dominoImage from "../assets/domino.png";
 import jokerWildsImage from "../assets/jokerwilds.jpg";
 import sweetTreatsImage from "../assets/sweettreats.jpg";
 import gomitasImage from "../assets/gomitas.jpg";
+import oceanRichesImage from "../assets/oceanriches.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
 // la categoría necesita notarse de un vistazo (ej. la grilla de "Juegos Populares" del Home) en
@@ -170,6 +171,18 @@ export const GAMES_CATALOG = [
     playPath: "/game/gomitas",
     description:
       "Tragamonedas neón de ositos de gomita en el espacio: 243 formas de ganar. 3 platillos dan giros gratis con premios x3 y 3 máquinas abren el bonus de la máquina de gomitas.",
+  },
+  {
+    slug: "oceanriches",
+    name: "Ocean Riches",
+    category: "slots",
+    status: "active",
+    image: oceanRichesImage,
+    icon: "sailing",
+    players: 0,
+    playPath: "/game/oceanriches",
+    description:
+      "Tragamonedas de pesca en el fondo del mar: 243 formas de ganar. Los peces traen premios y el pescador los recoge; el pelícano los multiplica, la marea sube en los giros gratis y 3 cofres abren la pesca en el fondo.",
   },
   {
     slug: "bingo",
