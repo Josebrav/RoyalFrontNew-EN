@@ -404,7 +404,7 @@ const Perfil = ({ isPublic = false }) => {
         <div className="flex flex-col lg:flex-row-reverse gap-8 items-start">
 
           {/* Banner + Avatar + Identity */}
-          <div className="flex-1 min-w-0 w-full relative rounded-2xl overflow-hidden border border-outline-variant/20 aspect-[16/9]">
+          <div className="flex-1 min-w-0 w-full relative rounded-2xl overflow-hidden border-2 border-[#a78bfa]/50 aspect-[16/9] shadow-[0_0_30px_rgba(139,92,246,0.35)]">
             <img src={profileBanner} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/30 to-black/75"></div>
 
@@ -522,9 +522,9 @@ const Perfil = ({ isPublic = false }) => {
               </div>
 
               {(user.description || isOwnProfile) && (
-                <div className="hidden md:block mt-1 max-w-xl w-full glass-card rounded-xl px-4 py-3 text-left">
+                <div className="hidden md:block mt-1 max-w-xl w-full rounded-xl px-4 py-3 text-left bg-[#0a0b18]/70 backdrop-blur-sm border border-[#22d3ee]/40 shadow-[0_0_14px_rgba(34,211,238,0.2)]">
                   {bioMeta && (
-                    <p className="text-primary text-[0.625rem] font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
+                    <p className="text-[#67e8f9] text-[0.625rem] font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
                   )}
                   <p className="text-on-surface text-xs leading-relaxed whitespace-pre-line line-clamp-3">
                     {user.description
@@ -539,8 +539,8 @@ const Perfil = ({ isPublic = false }) => {
           {/* Action Panel */}
           <div className="w-full lg:w-64 flex-shrink-0">
             {isOwnProfile ? (
-              <div className="glass-card rounded-xl overflow-hidden">
-                <h4 className="font-headline-sm text-headline-sm text-white px-6 pt-6 pb-3">Accesos Rápidos</h4>
+              <div className="rounded-xl overflow-hidden border border-[#a78bfa]/40 bg-gradient-to-b from-[#1b1840] to-[#0d0f1f] shadow-[0_0_22px_rgba(139,92,246,0.22)]">
+                <h4 className="font-headline-sm text-headline-sm px-6 pt-5 pb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#ffe08f] via-[#f9a8d4] to-[#7dd3fc]">Accesos Rápidos</h4>
                 <div className="flex flex-col">
                   {[
                     { label: "Mis Amigos", icon: "group", to: "/amigos", color: "#a855f7" },
@@ -556,9 +556,14 @@ const Perfil = ({ isPublic = false }) => {
                       key={item.to}
                       type="button"
                       onClick={() => navigate(item.to)}
-                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 first:border-t-0 hover:bg-surface-variant/30 transition-colors cursor-pointer text-on-surface"
+                      className="flex items-center gap-3 px-5 py-2.5 text-left bg-transparent border-0 border-t border-white/5 first:border-t-0 hover:bg-white/5 transition-colors cursor-pointer text-on-surface hover:text-white"
                     >
-                      <span className="material-symbols-outlined text-[20px]" style={{ color: item.color }}>{item.icon}</span>
+                      <span
+                        className="w-8 h-8 rounded-lg inline-flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${item.color}2e`, boxShadow: `inset 0 0 0 1px ${item.color}66` }}
+                      >
+                        <span className="material-symbols-outlined text-[18px]" style={{ color: item.color, fontVariationSettings: "'FILL' 1" }}>{item.icon}</span>
+                      </span>
                       <span className="font-label-lg text-label-lg">{item.label}</span>
                     </button>
                   ))}
@@ -566,24 +571,24 @@ const Perfil = ({ isPublic = false }) => {
               </div>
             ) : (
               currentUser?.id && (
-                <div className="glass-card rounded-xl overflow-hidden">
-                  <h4 className="font-headline-sm text-headline-sm text-white px-6 pt-6 pb-3">Acciones</h4>
+                <div className="rounded-xl overflow-hidden border border-[#ec4899]/40 bg-gradient-to-b from-[#2a1233] to-[#0d0f1f] shadow-[0_0_22px_rgba(236,72,153,0.2)]">
+                  <h4 className="font-headline-sm text-headline-sm px-6 pt-5 pb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#f9a8d4] to-[#c4b5fd]">Acciones</h4>
                   <div className="flex flex-col">
                     <button
                       type="button"
                       onClick={showRankBenefits}
-                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 first:border-t-0 hover:bg-surface-variant/30 transition-colors cursor-pointer text-on-surface"
+                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 first:border-t-0 hover:bg-white/5 transition-colors cursor-pointer text-on-surface"
                     >
-                      <span className="material-symbols-outlined text-primary text-[20px]">workspace_premium</span>
+                      <span className="material-symbols-outlined text-[20px] text-amber-300" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
                       <span className="font-label-lg text-label-lg">Ver Puntuación</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => navigate(`/mensajes/${user.nick}`)}
-                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-on-surface"
+                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-on-surface"
                     >
-                      <span className="material-symbols-outlined text-primary text-[20px]">forum</span>
+                      <span className="material-symbols-outlined text-[20px] text-[#2dd4bf]" style={{ fontVariationSettings: "'FILL' 1" }}>forum</span>
                       <span className="font-label-lg text-label-lg">Enviar Mensaje</span>
                     </button>
 
@@ -591,7 +596,7 @@ const Perfil = ({ isPublic = false }) => {
                       <button
                         type="button"
                         onClick={handleRemoveFriend}
-                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-primary"
+                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-primary"
                       >
                         <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>how_to_reg</span>
                         <span className="font-label-lg text-label-lg">Amigos</span>
@@ -611,7 +616,7 @@ const Perfil = ({ isPublic = false }) => {
                       <button
                         type="button"
                         onClick={handleAcceptFriendRequest}
-                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-primary"
+                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-primary"
                       >
                         <span className="material-symbols-outlined text-[20px]">person_add</span>
                         <span className="font-label-lg text-label-lg">Aceptar Solicitud</span>
@@ -621,9 +626,9 @@ const Perfil = ({ isPublic = false }) => {
                       <button
                         type="button"
                         onClick={handleSendFriendRequest}
-                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-on-surface"
+                        className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-on-surface"
                       >
-                        <span className="material-symbols-outlined text-primary text-[20px]">person_add</span>
+                        <span className="material-symbols-outlined text-[20px] text-[#a855f7]" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
                         <span className="font-label-lg text-label-lg">Añadir como Amigo</span>
                       </button>
                     )}
@@ -631,7 +636,7 @@ const Perfil = ({ isPublic = false }) => {
                     <button
                       type="button"
                       onClick={handleBlockToggle}
-                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-error"
+                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-error"
                     >
                       <span className="material-symbols-outlined text-[20px]">{isBlocked ? "how_to_reg" : "block"}</span>
                       <span className="font-label-lg text-label-lg">{isBlocked ? "Desbloquear Usuario" : "Bloquear Usuario"}</span>
@@ -640,7 +645,7 @@ const Perfil = ({ isPublic = false }) => {
                     <button
                       type="button"
                       onClick={() => reportUser({ userId: user.id, nick: capitalize(user.nick), context: "Perfil" })}
-                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-surface-variant/30 transition-colors cursor-pointer text-error"
+                      className="flex items-center gap-3 px-6 py-3 text-left bg-transparent border-0 border-t border-outline-variant/10 hover:bg-white/5 transition-colors cursor-pointer text-error"
                     >
                       <span className="material-symbols-outlined text-[20px]">flag</span>
                       <span className="font-label-lg text-label-lg">Denunciar Usuario</span>
@@ -651,11 +656,11 @@ const Perfil = ({ isPublic = false }) => {
             )}
 
             {/* Rank Progress */}
-            <div className="glass-card p-6 rounded-xl relative overflow-hidden group mt-6">
-              <div className="absolute -right-8 -bottom-8 w-32 h-32 royal-gold-gradient opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
+            <div className="p-6 rounded-xl relative overflow-hidden group mt-6 border border-amber-400/40 bg-gradient-to-b from-[#2a2010] to-[#0d0f1f] shadow-[0_0_22px_rgba(245,158,11,0.2)]">
+              <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-[#f59e0b] to-[#ec4899] opacity-25 rounded-full blur-2xl group-hover:opacity-40 transition-opacity"></div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-label-md text-label-md text-on-surface-variant uppercase">Rango Actual</span>
+                  <span className="font-label-md text-label-md text-amber-300 uppercase font-bold tracking-wider">Rango Actual</span>
                   <RankBadge tier={user.rank} size="sm" />
                 </div>
                 {rankBonusPercent > 0 && (
@@ -667,21 +672,21 @@ const Perfil = ({ isPublic = false }) => {
                       {nextRank ? "Próximo Rango" : "Rango Máximo Alcanzado"}
                     </span>
                     <h4 className="font-headline-sm text-headline-sm text-white">{nextRank ? nextRank.label : rankMeta.label}</h4>
-                    <div className="w-full bg-surface-container-lowest h-2 rounded-full mb-2 border border-outline-variant/10 overflow-hidden">
-                      <div className="royal-gold-gradient h-full" style={{ width: `${rankProgressPercentage}%` }}></div>
+                    <div className="w-full bg-[#0a0b18] h-2.5 rounded-full mb-2 border border-white/5 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#f59e0b] via-[#ec4899] to-[#8b5cf6] shadow-[0_0_10px_rgba(236,72,153,0.6)]" style={{ width: `${rankProgressPercentage}%` }}></div>
                     </div>
                     <div className="flex justify-between font-label-md text-label-md">
                       <span className="text-on-surface-variant">
                         {formatUsd(rankStatus.points)}
                         {rankStatus.nextThreshold ? ` / ${formatUsd(rankStatus.nextThreshold)}` : ""}
                       </span>
-                      <span className="text-primary">{rankProgressPercentage}%</span>
+                      <span className="text-[#f9a8d4] font-bold">{rankProgressPercentage}%</span>
                     </div>
                   </>
                 )}
                 <button
                   onClick={showRankBenefits}
-                  className="w-full mt-6 py-3 border border-primary/20 rounded-lg font-label-lg text-label-lg text-primary hover:bg-primary/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full mt-6 py-3 border-0 rounded-lg font-label-lg text-label-lg text-white font-bold bg-gradient-to-r from-[#f59e0b] to-[#ec4899] hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_14px_rgba(236,72,153,0.4)]"
                 >
                   <span className="material-symbols-outlined text-sm">workspace_premium</span>
                   Ver Sistema de Rangos
@@ -691,20 +696,23 @@ const Perfil = ({ isPublic = false }) => {
 
             {/* Referral Code */}
             {isOwnProfile && user.referralCode && (
-              <div className="glass-card p-6 rounded-xl relative overflow-hidden mt-6">
-                <h4 className="font-headline-sm text-headline-sm text-white mb-1">Referí Amigos</h4>
+              <div className="p-6 rounded-xl relative overflow-hidden mt-6 border border-emerald-400/40 bg-gradient-to-b from-[#0f2a24] to-[#0d0f1f] shadow-[0_0_22px_rgba(16,185,129,0.2)]">
+                <h4 className="font-headline-sm text-headline-sm text-white mb-1 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[22px] text-emerald-300" style={{ fontVariationSettings: "'FILL' 1" }}>redeem</span>
+                  Referí Amigos
+                </h4>
                 <p className="text-on-surface-variant text-xs mb-4">
                   Compartí tu código: si alguien se registra con él, recibe 1.000.000 de fichas de regalo.
                 </p>
-                <div className="flex items-center justify-between gap-2 bg-surface-container-lowest border border-outline-variant/20 rounded-lg px-4 py-3 mb-3">
-                  <span className="font-bold text-primary tracking-widest">{user.referralCode}</span>
+                <div className="flex items-center justify-between gap-2 bg-[#0a0b18] border border-dashed border-emerald-400/50 rounded-lg px-4 py-3 mb-3">
+                  <span className="font-black text-emerald-300 tracking-widest">{user.referralCode}</span>
                   <button
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(user.referralCode);
                       Swal.fire({ icon: "success", title: "¡Código copiado!", confirmButtonColor: "#C9A84C", timer: 1500, showConfirmButton: false });
                     }}
-                    className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer bg-transparent border-0"
+                    className="text-emerald-300/70 hover:text-emerald-200 transition-colors cursor-pointer bg-transparent border-0"
                     title="Copiar código"
                   >
                     <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -716,7 +724,7 @@ const Perfil = ({ isPublic = false }) => {
                     navigator.clipboard.writeText(`${window.location.origin}/?ref=${user.referralCode}`);
                     Swal.fire({ icon: "success", title: "¡Enlace copiado!", confirmButtonColor: "#C9A84C", timer: 1500, showConfirmButton: false });
                   }}
-                  className="w-full py-2.5 rounded-lg border border-primary/20 text-primary font-label-lg text-label-lg hover:bg-primary/10 transition-all flex items-center justify-center gap-2 cursor-pointer bg-transparent"
+                  className="w-full py-2.5 rounded-lg border-0 text-white font-bold font-label-lg text-label-lg bg-gradient-to-r from-[#10b981] to-[#06b6d4] hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_14px_rgba(16,185,129,0.4)]"
                 >
                   <span className="material-symbols-outlined text-sm">link</span>
                   Copiar Enlace de Invitación
@@ -729,9 +737,9 @@ const Perfil = ({ isPublic = false }) => {
 
         {/* Bio: shown below the banner on small screens, where there's no room to overlay it */}
         {(user.description || isOwnProfile) && (
-          <div className="md:hidden mt-4 glass-card rounded-xl px-5 py-4 text-left">
+          <div className="md:hidden mt-4 rounded-xl px-5 py-4 text-left bg-gradient-to-b from-[#0c2233] to-[#0d0f1f] border border-[#22d3ee]/40">
             {bioMeta && (
-              <p className="text-primary text-xs font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
+              <p className="text-[#67e8f9] text-xs font-bold uppercase tracking-wider mb-1">{bioMeta}</p>
             )}
             <p className="text-on-surface text-sm leading-relaxed whitespace-pre-line">
               {user.description
@@ -747,12 +755,12 @@ const Perfil = ({ isPublic = false }) => {
           bio de arriba. */}
       {(trophies.length > 0 || isOwnProfile) && (
         <section className="mb-10 text-left">
-          <h2 className="font-headline-sm text-headline-sm text-white mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">military_tech</span>
-            Trofeos
+          <h2 className="font-headline-sm text-headline-sm mb-4 flex items-center gap-2">
+            <span className="w-9 h-9 rounded-xl inline-flex items-center justify-center material-symbols-outlined text-[20px] text-white bg-gradient-to-br from-[#facc15] to-[#f59e0b] shadow-[0_0_14px_rgba(250,204,21,0.5)]" style={{ fontVariationSettings: "'FILL' 1" }}>military_tech</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffe08f] via-[#f9a8d4] to-[#7dd3fc]">Trofeos</span>
           </h2>
           {trophies.length === 0 ? (
-            <div className="glass-card rounded-xl p-6 text-center">
+            <div className="rounded-xl p-6 text-center border border-dashed border-amber-400/40 bg-gradient-to-b from-[#2a2010]/60 to-[#0d0f1f]">
               <p className="text-on-surface-variant text-sm">
                 Todavía no ganaste ningún trofeo. Ganá un torneo y tu premio va a aparecer acá.
               </p>
@@ -763,7 +771,7 @@ const Perfil = ({ isPublic = false }) => {
                 <div
                   key={trophy.id}
                   title={trophy.description || trophy.title}
-                  className="glass-card rounded-xl p-3 flex flex-col items-center gap-2 hover:border-primary/40 transition-colors border border-transparent"
+                  className="rounded-xl p-3 flex flex-col items-center gap-2 border border-amber-400/30 bg-gradient-to-b from-[#2a2010]/70 to-[#0d0f1f] hover:border-amber-300 hover:shadow-[0_0_18px_rgba(250,204,21,0.35)] transition-all"
                 >
                   <img
                     src={trophy.imageUrl}
