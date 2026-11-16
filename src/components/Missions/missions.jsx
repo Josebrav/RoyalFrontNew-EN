@@ -9,11 +9,12 @@ const SECTION_THEME = {
   weekly: { from: "#a855f7", to: "#ec4899", glow: "rgba(168,85,247,0.24)", bg: "linear-gradient(180deg, rgba(168,85,247,0.14), rgba(13,15,31,0.6) 45%)" },
 };
 
-function Section({ title, icon, period, now, theme }) {
+function Section({ title, icon, period, now, theme, tourId }) {
   if (!period) return null;
   const c = SECTION_THEME[theme];
   return (
     <section
+      data-tour={tourId}
       className="rounded-2xl border p-5 mb-6"
       style={{ borderColor: `${c.from}55`, background: c.bg, boxShadow: `0 0 26px ${c.glow}` }}
     >
@@ -86,8 +87,8 @@ export default function Missions() {
         )}
         {data && (
           <>
-            <Section title="Misiones diarias" icon="today" period={data.daily} now={now} theme="daily" />
-            <Section title="Misiones semanales" icon="date_range" period={data.weekly} now={now} theme="weekly" />
+            <Section title="Misiones diarias" icon="today" period={data.daily} now={now} theme="daily" tourId="missions-daily" />
+            <Section title="Misiones semanales" icon="date_range" period={data.weekly} now={now} theme="weekly" tourId="missions-weekly" />
           </>
         )}
       </div>
