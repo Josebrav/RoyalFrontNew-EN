@@ -15,6 +15,7 @@ import GameGrid from './components/Juegos/juegos';
 import News from './components/News/news';
 import RankSystem from './components/RankSystem/rankSystem';
 import Missions from './components/Missions/missions';
+import MissionsTour from './components/Missions/missionsTour';
 import RankUpNotice from './components/RankUpNotice/rankUpNotice';
 import OfferBanner from './components/OfferBanner/offerBanner';
 import FeaturedNews from './components/FeaturedNews/featuredNews';
@@ -345,6 +346,7 @@ function App() {
           </div>
         </div>
         <GlobalChat />
+        <MissionsTour />
         <RankUpNotice />
         <OfferBanner />
         <FeaturedNews />
