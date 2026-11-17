@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { POINTS_AND_TOURNAMENTS_NEWS_ID, newsArticlePath } from "../../../data/newsLinks";
 import Swal from "sweetalert2";
-import { CATEGORY_META, getGameBySlug } from "../../../data/gamesCatalog";
+import { CATEGORY_META, getDisplayedPlayers, getGameBySlug } from "../../../data/gamesCatalog";
 import { swalThemeConfig } from "../../../utils/formatters";
 import API_URL from "../../../api/rutaApi";
 import EditableImage from "../../ui/EditableImage";
@@ -199,7 +199,7 @@ export default function GameDetail() {
                 <span className="text-on-surface-variant uppercase tracking-wider text-[0.6875rem]">Jugando ahora</span>
                 <span className="flex items-center gap-1 text-white font-bold">
                   <span className="material-symbols-outlined text-[16px] text-primary">person</span>
-                  {new Intl.NumberFormat("es-ES").format(game.players)}
+                  {new Intl.NumberFormat("es-ES").format(getDisplayedPlayers(game))}
                 </span>
               </div>
             )}

@@ -20,7 +20,7 @@ import MissionsCard from "../Missions/missionsCard";
 import EditableText from "../ui/EditableText";
 import EditableImage from "../ui/EditableImage";
 import BannerCarousel from "../ui/BannerCarousel";
-import { GAMES_CATALOG, CATEGORY_META, getGameBySlug } from "../../data/gamesCatalog";
+import { GAMES_CATALOG, CATEGORY_META, getDisplayedPlayers, getGameBySlug } from "../../data/gamesCatalog";
 import { useOrderedGames } from "../../data/gameOrder";
 import GameOrderEditor from "../ui/GameOrderEditor";
 import { fetchUserProfile, getUserByEmail } from "../../redux/actions";
@@ -416,7 +416,7 @@ export default function Home() {
                         <h4 className="font-bold text-label-lg font-label-lg truncate text-white min-w-0">{game.name}</h4>
                         <span className="flex items-center gap-1 text-[0.6875rem] text-on-surface-variant flex-shrink-0">
                           <span className="material-symbols-outlined text-[13px]">person</span>
-                          {new Intl.NumberFormat("es-ES").format(game.players || 0)}
+                          {new Intl.NumberFormat("es-ES").format(getDisplayedPlayers(game))}
                         </span>
                       </div>
                     </div>

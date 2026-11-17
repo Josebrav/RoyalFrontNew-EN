@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { CATEGORY_META, CATEGORY_ORDER, getGamesByCategory } from "../../data/gamesCatalog";
+import { CATEGORY_META, CATEGORY_ORDER, getDisplayedPlayers, getGamesByCategory } from "../../data/gamesCatalog";
 import { t } from "../../i18n/strings";
 
 function GameRow({ game, compact }) {
@@ -44,7 +44,7 @@ function GameRow({ game, compact }) {
         {isActive ? (
           <span className="flex items-center gap-1 text-[0.6875rem] text-on-surface-variant mt-1">
             <span className="material-symbols-outlined text-[13px]">person</span>
-            {new Intl.NumberFormat("es-ES").format(game.players)}
+            {new Intl.NumberFormat("es-ES").format(getDisplayedPlayers(game))}
           </span>
         ) : (
           <span className="inline-block mt-1 text-[0.5625rem] font-bold uppercase tracking-wider text-on-surface-variant/70 border border-outline-variant/30 rounded-full px-2 py-0.5">

@@ -420,3 +420,21 @@ export const getGameByPlayPath = (rawPath) => {
 
 export const getGamesByCategory = (category) =>
   GAMES_CATALOG.filter((game) => game.category === category);
+
+/**
+ * Jugadores que se muestran en las tarjetas y en la página de cada juego. Los "players" del
+ * catálogo son un peso fijo, no gente real: los juegos sin número muestran entre 10 y 20, y los
+ * de miles se bajan a algo creíble (aprox. 30 a 80). Varía un poco cada 10 minutos, igual para
+ * todos los jugadores, así no salta en cada recarga.
+ */
+export const getDisplayedPlayers = (game) => {
+  if (!game) return 0;
+  const slug = String(game.slug || game.name || "");
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) hash = (hash * 31 + slug.charCodeAt(i)) | 0;
+  const window = Math.floor(Date.now() / (10 * 60 * 1000));
+  const jitter = (Math.abs(hash + window * 2654435761) % 7) - 3; // -3..+3
+  const base = Number(game.players) || 0;
+  if (base <= 0) return 15 + Math.round((jitter * 5) / 3); // 10..20
+  return Math.max(21, Math.round(20 + base / 55) + jitter);
+};
