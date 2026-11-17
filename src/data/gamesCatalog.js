@@ -5,6 +5,8 @@ import pachinkaImage from "../assets/rpachinka2.png";
 import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
+import pokerImage from "../assets/poker.jpg";
+import pokerImage from "../assets/poker.jpg";
 import bichoImage from "../assets/bicho.jpg";
 import buracoImage from "../assets/buraco.jpg";
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
@@ -285,10 +287,13 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-poker",
-    name: "RoyalPoker",
+    name: "Poker Texas Hold'em",
     category: "cartas",
-    status: "soon",
+    status: "active",
+    image: pokerImage,
     icon: "casino",
+    players: 0,
+    playPath: "/game/poker",
     description:
       "El Texas Hold'em de siempre, con la mesa de RoyalGames: leé a tus rivales, armá tu jugada y llevate el pozo.",
   },
