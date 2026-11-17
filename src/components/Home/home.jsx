@@ -471,7 +471,7 @@ export default function Home() {
             <aside className="xl:absolute xl:inset-0 flex flex-col gap-4 text-left min-h-0">
               {/* Top Winners Leaderboard */}
               <div
-                className="rounded-xl border border-emerald-400/40 overflow-hidden flex flex-col flex-shrink-0 bg-gradient-to-b from-[#0f2a2a] to-[#0d0f1f]"
+                className="rounded-xl border border-emerald-400/40 overflow-hidden flex flex-col flex-shrink-0 xl:flex-[1_0_auto] bg-gradient-to-b from-[#0f2a2a] to-[#0d0f1f]"
                 style={{ boxShadow: "0 0 24px rgba(52, 211, 153, 0.22)" }}
               >
                 <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 p-4 flex justify-between items-center">
@@ -481,7 +481,7 @@ export default function Home() {
                   </h3>
                   <span className="bg-black/25 text-white px-2 py-1 rounded text-label-md font-label-md font-bold">{t("home.dashboard.enVivo")}</span>
                 </div>
-                <div className="p-4 space-y-2">
+                <div className="p-4 flex flex-col gap-2 xl:flex-[1_0_auto]">
                   {topWinners.length === 0 ? (
                     <p className="text-on-surface-variant text-sm text-center py-4">
                       {t("home.dashboard.noPrizesYet")}
@@ -490,7 +490,7 @@ export default function Home() {
                     topWinners.map((player, index) => (
                       <div
                         key={player.id}
-                        className="flex items-center justify-between px-3 py-2 rounded-lg border-l-4"
+                        className="flex items-center justify-between px-3 py-2 rounded-lg border-l-4 xl:flex-[1_0_auto]"
                         style={{ background: (PODIUM[index] || PODIUM_REST).bg, borderLeftColor: (PODIUM[index] || PODIUM_REST).c }}
                       >
                         <div className="flex items-center gap-3 min-w-0">

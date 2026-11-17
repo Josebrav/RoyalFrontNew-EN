@@ -40,7 +40,7 @@ const METRIC_COLOR = {
 };
 
 /** Una misión: progreso, premio y botón de Cobrar (si está cumplida) o de Jugar. */
-export default function MissionItem({ mission, compact = false }) {
+export default function MissionItem({ mission, compact = false, grow = false }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state);
@@ -73,7 +73,7 @@ export default function MissionItem({ mission, compact = false }) {
 
   return (
     <div
-      className={`flex items-center rounded-xl border ${compact ? "gap-2 px-2.5 py-1.5" : "gap-3 p-3"} ${mission.claimed ? "opacity-60" : ""}`}
+      className={`flex items-center rounded-xl border ${grow ? "xl:flex-[1_0_auto]" : ""} ${compact ? "gap-2 px-2.5 py-1.5" : "gap-3 p-3"} ${mission.claimed ? "opacity-60" : ""}`}
       style={{
         borderColor: ready ? "rgba(34,197,94,0.6)" : `${color}33`,
         background: ready
