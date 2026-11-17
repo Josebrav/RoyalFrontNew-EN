@@ -178,6 +178,18 @@ export default function Navbar() {
         {/* Right Section: Logout / Login-Registrarse */}
         <div className="flex items-center gap-2 sm:gap-3 justify-self-end">
           {currentUser?.id ? (
+            <>
+            <button
+              type="button"
+              onClick={() => navigate("/chips")}
+              title={t("sidebar.comprarFichas")}
+              className="buy-chips-btn flex-shrink-0"
+            >
+              <span className="buy-chips-coin" aria-hidden="true">
+                <span className="material-symbols-outlined">add</span>
+              </span>
+              <span className="hidden sm:inline">{t("sidebar.comprarFichas")}</span>
+            </button>
             <button
               onClick={handleLogOut}
               title={t("nav.cerrarSesion")}
@@ -185,6 +197,7 @@ export default function Navbar() {
             >
               <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
+            </>
           ) : (
             <div className="flex gap-3">
               <Login className="px-6 py-2.5 rounded-sm border border-primary/40 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/10 transition-all btn-hover-glow cursor-pointer bg-transparent">
