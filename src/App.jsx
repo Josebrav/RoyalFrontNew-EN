@@ -47,6 +47,7 @@ import Buraco from './components/Juegos/Buraco/buraco';
 import GemaOfGold from './components/Juegos/GemaOfGold/gemaofgold';
 import RoyalRuleta from './components/Juegos/RoyalRuleta/royalruleta';
 import Blackjack from './components/Juegos/Blackjack/blackjack';
+import Poker from './components/Juegos/Poker/poker';
 import API_URL from './api/rutaApi';
 import Swal from 'sweetalert2';
 import { tokenStore } from './api/tokenStore';
@@ -331,6 +332,8 @@ function App() {
             <Route path="/game/royalruleta" element={LOCALE === "pt" ? <Navigate to="/game/royalroleta" replace /> : <RequireAuth><RoyalRuleta /></RequireAuth>} />
             <Route path="/game/royalroleta" element={<RequireAuth><RoyalRuleta /></RequireAuth>} />
             <Route path="/game/blackjack" element={<RequireAuth><Blackjack /></RequireAuth>} />
+            {/* Poker: en prueba, solo admin y mod */}
+            <Route path="/game/poker" element={<ProtectedRoute><Poker /></ProtectedRoute>} />
             <Route path="/royalstore" element={<RoyalStore />} />
             <Route path="/amigos" element={<Friends />} />
             <Route path="/mensajes" element={<Messages />} />
