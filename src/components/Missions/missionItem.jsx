@@ -73,7 +73,7 @@ export default function MissionItem({ mission, compact = false }) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border p-3 ${mission.claimed ? "opacity-60" : ""}`}
+      className={`flex items-center rounded-xl border ${compact ? "gap-2 px-2.5 py-1.5" : "gap-3 p-3"} ${mission.claimed ? "opacity-60" : ""}`}
       style={{
         borderColor: ready ? "rgba(34,197,94,0.6)" : `${color}33`,
         background: ready
@@ -83,16 +83,16 @@ export default function MissionItem({ mission, compact = false }) {
       }}
     >
       <span
-        className={`flex-shrink-0 inline-flex items-center justify-center rounded-xl ${compact ? "w-8 h-8" : "w-11 h-11"}`}
+        className={`flex-shrink-0 inline-flex items-center justify-center rounded-xl ${compact ? "w-7 h-7" : "w-11 h-11"}`}
         style={{ background: `linear-gradient(135deg, ${color}, ${color}99)`, boxShadow: `0 0 12px ${color}66` }}
       >
-        <span className={`material-symbols-outlined text-white ${compact ? "text-[18px]" : "text-[24px]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+        <span className={`material-symbols-outlined text-white ${compact ? "text-[16px]" : "text-[24px]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
           {mission.claimed ? "task_alt" : METRIC_ICON[mission.metric] || "flag"}
         </span>
       </span>
       <div className="min-w-0 flex-1">
         <p className={`font-bold text-white ${compact ? "text-xs" : "text-sm"} leading-snug`}>{missionTitle(mission)}</p>
-        <div className="mt-1.5 w-full bg-[#0a0b18] h-2 rounded-full overflow-hidden border border-white/5">
+        <div className={`${compact ? "mt-1 h-1.5" : "mt-1.5 h-2"} w-full bg-[#0a0b18] rounded-full overflow-hidden border border-white/5`}>
           <div
             className="h-full rounded-full"
             style={{
@@ -102,7 +102,7 @@ export default function MissionItem({ mission, compact = false }) {
             }}
           />
         </div>
-        <p className="mt-1 text-[0.6875rem] text-on-surface-variant tabular-nums">
+        <p className={`${compact ? "mt-0.5 text-[0.625rem]" : "mt-1 text-[0.6875rem]"} text-on-surface-variant tabular-nums`}>
           {formatNumber(mission.progress)} / {formatNumber(mission.target)}
           <span className="text-amber-300 font-bold"> · +{formatNumber(mission.reward)} fichas</span>
         </p>
@@ -114,7 +114,7 @@ export default function MissionItem({ mission, compact = false }) {
           type="button"
           onClick={handleClaim}
           disabled={claiming}
-          className="bg-gradient-to-r from-[#22c55e] to-[#facc15] px-3 py-1.5 rounded-lg text-[#0A0A0F] font-black text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 disabled:opacity-60 shadow-[0_0_14px_rgba(34,197,94,0.55)]"
+          className={`bg-gradient-to-r from-[#22c55e] to-[#facc15] ${compact ? "px-2.5 py-1 text-[0.6875rem]" : "px-3 py-1.5 text-xs"} rounded-lg text-[#0A0A0F] font-black uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 disabled:opacity-60 shadow-[0_0_14px_rgba(34,197,94,0.55)]`}
         >
           Cobrar
         </button>
@@ -122,7 +122,7 @@ export default function MissionItem({ mission, compact = false }) {
         <button
           type="button"
           onClick={() => navigate(game?.playPath || "/juegos")}
-          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-bold text-xs uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 shadow-[0_0_12px_rgba(139,92,246,0.45)]"
+          className={`${compact ? "px-2.5 py-1 text-[0.6875rem]" : "px-3 py-1.5 text-xs"} rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-bold uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 shadow-[0_0_12px_rgba(139,92,246,0.45)]`}
         >
           Jugar
         </button>
