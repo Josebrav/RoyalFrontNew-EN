@@ -6,7 +6,6 @@ import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
 import pokerImage from "../assets/poker.jpg";
-import pokerImage from "../assets/poker.jpg";
 import bichoImage from "../assets/bicho.jpg";
 import buracoImage from "../assets/buraco.jpg";
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
