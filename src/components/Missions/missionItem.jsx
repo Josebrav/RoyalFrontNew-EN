@@ -21,6 +21,11 @@ const METRIC_ICON = {
   ruleta_rounds: "radio_button_checked",
   blackjack_hands: "style",
   bicho_bets: "pets",
+  game_rounds: "casino",
+  poker_hands: "playing_cards",
+  poker_wins: "emoji_events",
+  buraco_rounds: "layers",
+  buraco_wins: "emoji_events",
 };
 
 /** Color del cuadrito del icono, segun lo que pide la mision. */
@@ -37,6 +42,11 @@ const METRIC_COLOR = {
   ruleta_rounds: "#ef4444",
   blackjack_hands: "#10b981",
   bicho_bets: "#84cc16",
+  game_rounds: "#d946ef",
+  poker_hands: "#0ea5e9",
+  poker_wins: "#eab308",
+  buraco_rounds: "#6366f1",
+  buraco_wins: "#eab308",
 };
 
 /** Una misión: progreso, premio y botón de Cobrar (si está cumplida) o de Jugar. */
@@ -49,6 +59,9 @@ export default function MissionItem({ mission, compact = false, grow = false }) 
   const game = mission.gameSlug ? getGameBySlug(mission.gameSlug) : null;
   const ready = mission.completed && !mission.claimed;
   const color = ready ? "#22c55e" : METRIC_COLOR[mission.metric] || "#8b5cf6";
+  // Misión de un juego puntual: se muestra la imagen del juego (si el catálogo la tiene) en vez del icono.
+  const gameImage = mission.metric === "game_rounds" && !mission.claimed ? game?.image : null;
+  const icon = mission.claimed ? "task_alt" : (mission.metric === "game_rounds" && game?.icon) || METRIC_ICON[mission.metric] || "flag";
 
   const handleClaim = async () => {
     if (claiming) return;
@@ -83,12 +96,16 @@ export default function MissionItem({ mission, compact = false, grow = false }) 
       }}
     >
       <span
-        className={`flex-shrink-0 inline-flex items-center justify-center rounded-xl ${compact ? "w-7 h-7" : "w-11 h-11"}`}
+        className={`flex-shrink-0 inline-flex items-center justify-center rounded-xl overflow-hidden ${compact ? "w-7 h-7" : "w-11 h-11"}`}
         style={{ background: `linear-gradient(135deg, ${color}, ${color}99)`, boxShadow: `0 0 12px ${color}66` }}
       >
-        <span className={`material-symbols-outlined text-white ${compact ? "text-[16px]" : "text-[24px]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-          {mission.claimed ? "task_alt" : METRIC_ICON[mission.metric] || "flag"}
-        </span>
+        {gameImage ? (
+          <img src={gameImage} alt={game?.name || ""} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <span className={`material-symbols-outlined text-white ${compact ? "text-[16px]" : "text-[24px]"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+            {icon}
+          </span>
+        )}
       </span>
       <div className="min-w-0 flex-1">
         <p className={`font-bold text-white ${compact ? "text-xs" : "text-sm"} leading-snug`}>{missionTitle(mission)}</p>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../api/rutaApi";
+import { getGameBySlug } from "../data/gamesCatalog";
 import { LOCALE } from "../i18n/locale";
 
 // Aviso entre componentes (panel, tarjeta del inicio y menú lateral) de que cambiaron las misiones,
@@ -59,6 +60,11 @@ const TITLES = {
     ruleta_rounds: (n) => `Apostá en ${n} rondas de ruleta`,
     blackjack_hands: (n) => `Jugá ${n} manos de blackjack`,
     bicho_bets: (n) => `Hacé ${n} apuestas al Jogo do Bicho`,
+    game_rounds: (n, game) => game && `Girá ${n} veces en ${game}`,
+    poker_hands: (n) => `Jugá ${n} manos de póker`,
+    poker_wins: (n) => `Ganá ${n} manos de póker`,
+    buraco_rounds: (n) => `Jugá ${n} manos de Buraco`,
+    buraco_wins: (n) => `Ganá ${n} partidas de Buraco`,
   },
   en: {
     plays: (n) => `Make ${n} plays in any game`,
@@ -73,6 +79,11 @@ const TITLES = {
     ruleta_rounds: (n) => `Bet on ${n} roulette rounds`,
     blackjack_hands: (n) => `Play ${n} blackjack hands`,
     bicho_bets: (n) => `Place ${n} Jogo do Bicho bets`,
+    game_rounds: (n, game) => game && `Spin ${n} times in ${game}`,
+    poker_hands: (n) => `Play ${n} poker hands`,
+    poker_wins: (n) => `Win ${n} poker hands`,
+    buraco_rounds: (n) => `Play ${n} Buraco hands`,
+    buraco_wins: (n) => `Win ${n} Buraco matches`,
   },
   pt: {
     plays: (n) => `Faça ${n} jogadas em qualquer jogo`,
@@ -87,14 +98,23 @@ const TITLES = {
     ruleta_rounds: (n) => `Aposte em ${n} rodadas de roleta`,
     blackjack_hands: (n) => `Jogue ${n} mãos de blackjack`,
     bicho_bets: (n) => `Faça ${n} apostas no Jogo do Bicho`,
+    game_rounds: (n, game) => game && `Gire ${n} vezes em ${game}`,
+    poker_hands: (n) => `Jogue ${n} mãos de pôquer`,
+    poker_wins: (n) => `Ganhe ${n} mãos de pôquer`,
+    buraco_rounds: (n) => `Jogue ${n} mãos de Buraco`,
+    buraco_wins: (n) => `Ganhe ${n} partidas de Buraco`,
   },
 };
 
 const numberFmt = new Intl.NumberFormat(LOCALE === "en" ? "en-US" : LOCALE === "pt" ? "pt-BR" : "es-AR");
 export const formatNumber = (n) => numberFmt.format(Number(n) || 0);
 
-/** Título en el idioma del sitio (el backend lo manda en español; si falta la métrica, se usa ese). */
-export const missionTitle = (m) => TITLES[LOCALE]?.[m.metric]?.(formatNumber(m.target)) || m.title;
+/**
+ * Título en el idioma del sitio (el backend lo manda en español; si falta la métrica, se usa ese).
+ * Las de un juego puntual (game_rounds) llevan el nombre del juego del catálogo.
+ */
+export const missionTitle = (m) =>
+  TITLES[LOCALE]?.[m.metric]?.(formatNumber(m.target), m.gameSlug ? getGameBySlug(m.gameSlug)?.name : undefined) || m.title;
 
 const dateFmt = new Intl.DateTimeFormat(LOCALE === "en" ? "en-US" : LOCALE === "pt" ? "pt-BR" : "es-AR", {
   weekday: "long",
