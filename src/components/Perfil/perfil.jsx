@@ -550,7 +550,7 @@ const Perfil = ({ isPublic = false }) => {
                     <img
                       src={roleInsignia}
                       alt={user.role === "admin" ? "Admin" : "Mod"}
-                      className="h-9 sm:h-14 w-auto object-contain"
+                      className="h-10 sm:h-16 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,200,60,0.55)]"
                     />
                   </div>
                 )}
