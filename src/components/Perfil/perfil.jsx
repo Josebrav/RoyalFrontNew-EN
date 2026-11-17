@@ -12,6 +12,8 @@ import bannerPerfilVerde from "../../assets/BannerPerfilVerde.png";
 import insigniaAdmin from "../../assets/InsigniaAdmin.png";
 import insigniaMod from "../../assets/InsigniaMod.png";
 import AvatarImg from "../Avatar/avatarImg";
+import FondosShop from "./fondosShop";
+import { profileBackgroundImage } from "../../data/profileBackgrounds";
 import {
   viewedUserProfile,
   updateUserProfile,
@@ -55,6 +57,8 @@ const Perfil = ({ isPublic = false }) => {
   );
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isFondosOpen, setIsFondosOpen] = useState(false);
+  const [previewBackground, setPreviewBackground] = useState(undefined);
   // Only meaningful for public profiles (isPublic=true) — tracks whether the nick lookup is
   // still in flight, failed (no such user), or resolved, since redux's viewedUserProfile
   // starts as an empty array (truthy!) so a plain `!user` check can't tell "not found" apart
@@ -361,7 +365,11 @@ const Perfil = ({ isPublic = false }) => {
 
   const totalChips = user.chips || 0;
   const rankMeta = getRankMeta(user.rank);
-  const profileBanner = user.role === "admin" ? bannerPerfilDorado : user.role === "mod" ? bannerPerfilVerde : bannerPerfil;
+  const classicBanner = user.role === "admin" ? bannerPerfilDorado : user.role === "mod" ? bannerPerfilVerde : bannerPerfil;
+  // Fondo comprado en la tienda de fondos; mientras la tienda esta abierta se ve el que se esta mirando
+  // (previewBackground: undefined = sin vista previa, null = el clasico)
+  const shownBackground = isOwnProfile && previewBackground !== undefined ? previewBackground : user.profileBackground;
+  const profileBanner = profileBackgroundImage(shownBackground) || classicBanner;
   const roleInsignia = user.role === "admin" ? insigniaAdmin : user.role === "mod" ? insigniaMod : null;
   // El progreso (en dólares) es privado: solo se ve en el perfil propio.
   const nextRank = rankStatus?.nextRank ? RANK_META[rankStatus.nextRank] : null;
@@ -425,6 +433,17 @@ const Perfil = ({ isPublic = false }) => {
                   </div>
                 );
               })()}
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  onClick={() => setIsFondosOpen(true)}
+                  title="Cambiar fondo"
+                  className="h-8 sm:h-10 px-3 sm:px-4 rounded-full bg-gradient-to-b from-[#a855f7] to-[#6d28d9] border-2 border-[#ffd84a] text-white font-black text-[0.6875rem] sm:text-sm tracking-wide flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform cursor-pointer flex-shrink-0 shadow-[0_0_12px_rgba(168,85,247,0.6)]"
+                >
+                  <span className="material-symbols-outlined text-[16px] sm:text-[18px]">wallpaper</span>
+                  FONDOS
+                </button>
+              )}
               {isOwnProfile && (
                 <button
                   type="button"
@@ -959,6 +978,14 @@ const Perfil = ({ isPublic = false }) => {
             </div>
           </div>
         </div>
+      )}
+      {isOwnProfile && (
+        <FondosShop
+          open={isFondosOpen}
+          onClose={() => setIsFondosOpen(false)}
+          classicImage={classicBanner}
+          onPreview={setPreviewBackground}
+        />
       )}
     </main>
   );
