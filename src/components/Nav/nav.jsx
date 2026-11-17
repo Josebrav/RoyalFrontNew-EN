@@ -178,6 +178,16 @@ export default function Navbar() {
         {/* Right Section: Logout / Login-Registrarse */}
         <div className="flex items-center gap-2 sm:gap-3 justify-self-end">
           {currentUser?.id ? (
+            <>
+            <button
+              type="button"
+              onClick={() => navigate("/chips")}
+              title={t("sidebar.comprarFichas")}
+              className="h-10 px-3 sm:px-4 rounded-lg gold-gradient text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border-0 cursor-pointer flex-shrink-0 btn-hover-glow hover:brightness-110 transition-all"
+            >
+              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
+              <span className="hidden sm:inline">{t("sidebar.comprarFichas")}</span>
+            </button>
             <button
               onClick={handleLogOut}
               title={t("nav.cerrarSesion")}
@@ -185,6 +195,7 @@ export default function Navbar() {
             >
               <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
+            </>
           ) : (
             <div className="flex gap-3">
               <Login className="px-6 py-2.5 rounded-sm border border-primary/40 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/10 transition-all btn-hover-glow cursor-pointer bg-transparent">
