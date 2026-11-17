@@ -13,7 +13,7 @@ import insigniaAdmin from "../../assets/InsigniaAdmin.png";
 import insigniaMod from "../../assets/InsigniaMod.png";
 import AvatarImg from "../Avatar/avatarImg";
 import FondosShop from "./fondosShop";
-import { profileBackgroundImage } from "../../data/profileBackgrounds";
+import { profileBackgroundImage, profileBackgroundTheme } from "../../data/profileBackgrounds";
 import {
   viewedUserProfile,
   updateUserProfile,
@@ -59,6 +59,8 @@ const Perfil = ({ isPublic = false }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFondosOpen, setIsFondosOpen] = useState(false);
   const [previewBackground, setPreviewBackground] = useState(undefined);
+  // Lo que quedo puesto despues de comprar/usar en la tienda (el perfil publico propio no se recarga solo)
+  const [appliedBackground, setAppliedBackground] = useState(undefined);
   // Only meaningful for public profiles (isPublic=true) — tracks whether the nick lookup is
   // still in flight, failed (no such user), or resolved, since redux's viewedUserProfile
   // starts as an empty array (truthy!) so a plain `!user` check can't tell "not found" apart
@@ -368,7 +370,12 @@ const Perfil = ({ isPublic = false }) => {
   const classicBanner = user.role === "admin" ? bannerPerfilDorado : user.role === "mod" ? bannerPerfilVerde : bannerPerfil;
   // Fondo comprado en la tienda de fondos; mientras la tienda esta abierta se ve el que se esta mirando
   // (previewBackground: undefined = sin vista previa, null = el clasico)
-  const shownBackground = isOwnProfile && previewBackground !== undefined ? previewBackground : user.profileBackground;
+  const shownBackground = isOwnProfile && previewBackground !== undefined
+      ? previewBackground
+      : isOwnProfile && appliedBackground !== undefined
+        ? appliedBackground
+        : user.profileBackground;
+  const backgroundTheme = profileBackgroundTheme(shownBackground);
   const profileBanner = profileBackgroundImage(shownBackground) || classicBanner;
   const roleInsignia = user.role === "admin" ? insigniaAdmin : user.role === "mod" ? insigniaMod : null;
   // El progreso (en dólares) es privado: solo se ve en el perfil propio.
@@ -455,6 +462,25 @@ const Perfil = ({ isPublic = false }) => {
                 </button>
               )} 
             </div>
+
+            {/* Fondo comprado: marco para el avatar (el clasico ya lo trae dibujado), en el mismo lugar */}
+            {backgroundTheme && (
+              <div
+                className="absolute aspect-square rounded-2xl pointer-events-none"
+                style={{
+                  left: "21%",
+                  bottom: "27.5%",
+                  width: "24.5%",
+                  transform: "translateX(-50%)",
+                  background: "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.18), rgba(10,8,30,0.55) 70%)",
+                  backdropFilter: "blur(3px)",
+                  border: `3px solid ${backgroundTheme.frame}`,
+                  boxShadow: `0 0 18px ${backgroundTheme.glow}, inset 0 0 16px ${backgroundTheme.glow}`,
+                }}
+              >
+                <div className="absolute inset-[6%] rounded-xl border border-white/25" />
+              </div>
+            )}
 
             {/* Avatar / Photo, positioned inside the banner's frame */}
             <div
@@ -985,6 +1011,7 @@ const Perfil = ({ isPublic = false }) => {
           onClose={() => setIsFondosOpen(false)}
           classicImage={classicBanner}
           onPreview={setPreviewBackground}
+          onApplied={setAppliedBackground}
         />
       )}
     </main>

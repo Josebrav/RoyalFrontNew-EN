@@ -1,13 +1,15 @@
 // Fondos de perfil (cabecera 16:9 detras del avatar). Los precios y quien compro que los maneja el servidor
-// (modulo profile-backgrounds); aca solo van las imagenes. "clasico" = el banner de siempre segun el rango.
+// (modulo profile-backgrounds); aca solo van las imagenes y el color del marco del avatar de cada uno.
+// "clasico" = el banner de siempre segun el rango (ese ya trae su marco dibujado).
 import dulces from "../assets/fondos/dulces.jpg";
 import gamer from "../assets/fondos/gamer.jpg";
 import navidad from "../assets/fondos/navidad.jpg";
 
-export const PROFILE_BACKGROUND_IMAGES = {
-  dulces,
-  gamer,
-  navidad,
+export const PROFILE_BACKGROUNDS = {
+  dulces: { image: dulces, frame: "#ff5fb8", glow: "rgba(255,95,184,0.75)" },
+  gamer: { image: gamer, frame: "#22d3ee", glow: "rgba(168,85,247,0.85)" },
+  navidad: { image: navidad, frame: "#ffd84a", glow: "rgba(239,68,68,0.7)" },
 };
 
-export const profileBackgroundImage = (id) => (id && PROFILE_BACKGROUND_IMAGES[id]) || null;
+export const profileBackgroundImage = (id) => (id && PROFILE_BACKGROUNDS[id]?.image) || null;
+export const profileBackgroundTheme = (id) => (id && PROFILE_BACKGROUNDS[id]) || null;
