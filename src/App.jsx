@@ -333,7 +333,7 @@ function App() {
             <Route path="/game/royalroleta" element={<RequireAuth><RoyalRuleta /></RequireAuth>} />
             <Route path="/game/blackjack" element={<RequireAuth><Blackjack /></RequireAuth>} />
             {/* Poker: en prueba, solo admin y mod */}
-            <Route path="/game/poker" element={<ProtectedRoute><Poker /></ProtectedRoute>} />
+            <Route path="/game/poker" element={<RequireAuth><Poker /></RequireAuth>} />
             <Route path="/royalstore" element={<RoyalStore />} />
             <Route path="/amigos" element={<Friends />} />
             <Route path="/mensajes" element={<Messages />} />
