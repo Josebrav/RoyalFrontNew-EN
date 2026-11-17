@@ -230,6 +230,7 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "bicho",
+    showOnHome: false,
     name: "Juego del Bicho",
     category: "casino",
     status: "soon",
@@ -318,7 +319,35 @@ export const GAMES_CATALOG = [
       "Armá tríos y escaleras antes que tus rivales en este clásico de mesa sudamericano, ahora online contra otros jugadores de RoyalGames.",
   },
   {
+    slug: "royalcats",
+    name: "Royal Cats",
+    category: "slots",
+    status: "soon",
+    icon: "pets",
+    description:
+      "Gatos reales llenos de joyas: giros gratis con WILD pegajosos y un bonus de ovillos para elegir premios.",
+  },
+  {
+    slug: "sweetfuturist",
+    name: "Sweet Futurist",
+    category: "slots",
+    status: "soon",
+    icon: "rocket_launch",
+    description:
+      "Dulces del futuro en una tragamonedas llena de color, neón y premios que caen en cascada.",
+  },
+  {
+    slug: "chinchon",
+    name: "Chinchón",
+    category: "cartas",
+    status: "soon",
+    icon: "style",
+    description:
+      "El clásico juego de cartas españolas: armá escaleras y grupos, cortá a tiempo y buscá el chinchón.",
+  },
+  {
     slug: "pearl-empires",
+    showOnHome: false,
     name: "Pearl Empires",
     category: "slots",
     status: "soon",
@@ -328,6 +357,7 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-gods",
+    showOnHome: false,
     name: "RoyalGods",
     category: "slots",
     status: "soon",
@@ -337,6 +367,7 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-futbol",
+    showOnHome: false,
     name: "RoyalFutbol",
     category: "slots",
     status: "soon",

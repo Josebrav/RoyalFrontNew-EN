@@ -439,7 +439,7 @@ export default function Home() {
                 ))}
 
                 {/* Juegos que todavia no salieron: misma tarjeta, en gris y sin jugar */}
-                {orderedGames.filter((game) => game.status !== "active").map((game) => (
+                {orderedGames.filter((game) => game.status !== "active" && game.showOnHome !== false).map((game) => (
                   <div
                     key={game.slug}
                     onClick={() => navigate(`/juegos/${game.slug}`)}
