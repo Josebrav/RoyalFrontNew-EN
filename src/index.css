@@ -515,3 +515,89 @@ html::before {
   pointer-events: none;
 }
 body, .bg-background:not(input):not(select):not(textarea) { background-color: transparent !important; }
+
+/* Boton "Comprar fichas" de la barra: pastilla dorada con relieve, ficha verde y un destello que la recorre */
+.buy-chips-btn {
+  position: relative;
+  overflow: hidden;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 0 6px;
+  border-radius: 9999px;
+  border: 1px solid #fff1b0;
+  background: linear-gradient(180deg, #fff0a8 0%, #f7cd4f 38%, #e2a21c 72%, #c98410 100%);
+  box-shadow:
+    0 0 0 2px rgba(110, 62, 0, 0.6),
+    0 4px 16px rgba(247, 190, 50, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -3px 0 rgba(130, 72, 0, 0.35);
+  color: #3b2200;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+.buy-chips-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.65) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: buy-chips-shine 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.buy-chips-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 2px rgba(110, 62, 0, 0.6),
+    0 6px 22px rgba(247, 190, 50, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -3px 0 rgba(130, 72, 0, 0.35);
+}
+.buy-chips-btn:active { transform: translateY(1px); filter: brightness(0.97); }
+.buy-chips-btn:focus-visible { outline: 2px solid #fff1b0; outline-offset: 3px; }
+/* Ficha verde de casino con el "+" */
+.buy-chips-coin {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #4fe08f 0%, #1c9a57 55%, #0e6a3a 100%);
+  box-shadow: 0 0 0 2px #0b4d2a, 0 2px 4px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+.buy-chips-coin::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 9999px;
+  border: 2px dashed rgba(255, 255, 255, 0.75);
+}
+.buy-chips-coin .material-symbols-outlined {
+  position: relative;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+@media (max-width: 639px) {
+  .buy-chips-btn { padding: 0 6px; }
+}
+@keyframes buy-chips-shine {
+  0%, 60% { left: -60%; }
+  100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buy-chips-btn::after { animation: none; display: none; }
+}

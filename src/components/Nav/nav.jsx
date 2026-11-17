@@ -183,9 +183,11 @@ export default function Navbar() {
               type="button"
               onClick={() => navigate("/chips")}
               title={t("sidebar.comprarFichas")}
-              className="h-10 px-3 sm:px-4 rounded-lg gold-gradient text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border-0 cursor-pointer flex-shrink-0 btn-hover-glow hover:brightness-110 transition-all"
+              className="buy-chips-btn flex-shrink-0"
             >
-              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
+              <span className="buy-chips-coin" aria-hidden="true">
+                <span className="material-symbols-outlined">add</span>
+              </span>
               <span className="hidden sm:inline">{t("sidebar.comprarFichas")}</span>
             </button>
             <button
