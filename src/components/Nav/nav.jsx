@@ -183,19 +183,24 @@ export default function Navbar() {
               type="button"
               onClick={() => navigate("/chips")}
               title={t("sidebar.comprarFichas")}
-              className="buy-chips-btn flex-shrink-0"
+              className="hud-btn buy-chips-btn flex-shrink-0"
             >
-              <span className="buy-chips-coin" aria-hidden="true">
-                <span className="material-symbols-outlined">add</span>
+              <span className="hud-btn-inner">
+                <span className="buy-chips-coin" aria-hidden="true">
+                  <span className="material-symbols-outlined">add</span>
+                </span>
+                <span className="hidden sm:inline">{t("sidebar.comprarFichas")}</span>
               </span>
-              <span className="hidden sm:inline">{t("sidebar.comprarFichas")}</span>
             </button>
             <button
+              type="button"
               onClick={handleLogOut}
               title={t("nav.cerrarSesion")}
-              className="hud-icon-btn w-11 h-10 flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors bg-transparent border-0 cursor-pointer flex-shrink-0"
+              className="hud-btn hud-btn-logout flex-shrink-0"
             >
-              <span className="material-symbols-outlined text-[20px]">logout</span>
+              <span className="hud-btn-inner">
+                <span className="material-symbols-outlined text-[20px]">logout</span>
+              </span>
             </button>
             </>
           ) : (

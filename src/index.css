@@ -516,55 +516,70 @@ html::before {
 }
 body, .bg-background:not(input):not(select):not(textarea) { background-color: transparent !important; }
 
-/* Boton "Comprar fichas" de la barra: pastilla dorada con relieve, ficha verde y un destello que la recorre */
-.buy-chips-btn {
+/* Botones de la barra (Comprar fichas / Cerrar sesion): mismo marco con esquinas cortadas y borde
+   degradado que el recuadro del perfil. Comprar va con borde dorado y brillo; salir, violeta/cian. */
+.hud-btn {
+  --cut: 10px;
+  position: relative;
+  height: 40px;
+  padding: 1px;
+  border: 0;
+  background: linear-gradient(135deg, #a78bfa, #ec4899 35%, #22d3ee 75%, #a78bfa);
+  clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.45));
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.15s;
+}
+.hud-btn-inner {
   position: relative;
   overflow: hidden;
-  height: 40px;
-  display: inline-flex;
+  height: 100%;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 0 18px 0 6px;
-  border-radius: 9999px;
-  border: 1px solid #fff1b0;
-  background: linear-gradient(180deg, #fff0a8 0%, #f7cd4f 38%, #e2a21c 72%, #c98410 100%);
-  box-shadow:
-    0 0 0 2px rgba(110, 62, 0, 0.6),
-    0 4px 16px rgba(247, 190, 50, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -3px 0 rgba(130, 72, 0, 0.35);
-  color: #3b2200;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(135deg, #1b1840, #0b0c1e);
+  clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+}
+.hud-btn:hover { filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.6)); transform: translateY(-1px); }
+.hud-btn:active { transform: translateY(1px); }
+.hud-btn:focus-visible { outline: 2px solid #a5f3fc; outline-offset: 3px; }
+
+.hud-btn-logout { width: 44px; }
+.hud-btn-logout .hud-btn-inner { color: #c8c3b8; transition: color 0.2s; }
+.hud-btn-logout:hover .hud-btn-inner { color: #fb7185; }
+
+.buy-chips-btn {
+  background: linear-gradient(135deg, #fff0a8, #f7cd4f 30%, #c98410 55%, #f7cd4f 80%, #fff0a8);
+  filter: drop-shadow(0 0 8px rgba(247, 190, 50, 0.45));
+}
+.buy-chips-btn:hover { filter: drop-shadow(0 0 14px rgba(247, 190, 50, 0.7)); }
+.buy-chips-btn .hud-btn-inner {
+  padding: 0 16px 0 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 240, 168, 0.16), transparent 50%),
+    linear-gradient(135deg, #2a2040, #120f24);
+  color: #f5d980;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  text-shadow: 0 0 10px rgba(247, 205, 79, 0.45);
 }
-.buy-chips-btn::after {
+.buy-chips-btn .hud-btn-inner::after {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   left: -60%;
   width: 40%;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.65) 50%, transparent 100%);
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 240, 168, 0.22) 50%, transparent 100%);
   transform: skewX(-20deg);
   animation: buy-chips-shine 3.6s ease-in-out infinite;
   pointer-events: none;
 }
-.buy-chips-btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow:
-    0 0 0 2px rgba(110, 62, 0, 0.6),
-    0 6px 22px rgba(247, 190, 50, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -3px 0 rgba(130, 72, 0, 0.35);
-}
-.buy-chips-btn:active { transform: translateY(1px); filter: brightness(0.97); }
-.buy-chips-btn:focus-visible { outline: 2px solid #fff1b0; outline-offset: 3px; }
 /* Ficha verde de casino con el "+" */
 .buy-chips-coin {
   position: relative;
@@ -592,12 +607,12 @@ body, .bg-background:not(input):not(select):not(textarea) { background-color: tr
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 @media (max-width: 639px) {
-  .buy-chips-btn { padding: 0 6px; }
+  .buy-chips-btn .hud-btn-inner { padding: 0 7px; }
 }
 @keyframes buy-chips-shine {
   0%, 60% { left: -60%; }
   100% { left: 130%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .buy-chips-btn::after { animation: none; display: none; }
+  .buy-chips-btn .hud-btn-inner::after { animation: none; display: none; }
 }
