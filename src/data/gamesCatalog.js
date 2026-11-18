@@ -15,6 +15,8 @@ import sweetTreatsImage from "../assets/sweettreats.jpg";
 import gomitasImage from "../assets/gomitas.jpg";
 import oceanRichesImage from "../assets/oceanriches.jpg";
 import gamerZoneImage from "../assets/gamerzone.jpg";
+import royalCatsImage from "../assets/royalcats.jpg";
+import chinchonImage from "../assets/chinchon.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
 // la categoría necesita notarse de un vistazo (ej. la grilla de "Juegos Populares" del Home) en
@@ -322,10 +324,13 @@ export const GAMES_CATALOG = [
     slug: "royalcats",
     name: "Royal Cats",
     category: "slots",
-    status: "soon",
+    status: "active",
+    image: royalCatsImage,
     icon: "pets",
+    players: 0,
+    playPath: "/game/royalcats",
     description:
-      "Gatos reales llenos de joyas: giros gratis con WILD pegajosos y un bonus de ovillos para elegir premios.",
+      "Gatos reales llenos de joyas: 243 formas de ganar, giros gratis con WILD que quedan pegados y un bonus de ovillos para elegir premios.",
   },
   {
     slug: "sweetfuturist",
@@ -340,8 +345,11 @@ export const GAMES_CATALOG = [
     slug: "chinchon",
     name: "Chinchón",
     category: "cartas",
-    status: "soon",
+    status: "active",
+    image: chinchonImage,
     icon: "style",
+    players: 0,
+    playPath: "/game/chinchon",
     description:
       "El clásico juego de cartas españolas: armá escaleras y grupos, cortá a tiempo y buscá el chinchón.",
   },
