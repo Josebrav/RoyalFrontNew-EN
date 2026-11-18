@@ -5,11 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 import { fetchConversations } from "../../redux/actions/index";
 import { t } from "../../i18n/strings";
+import useMissions from "../../utils/useMissions";
 
 export default function Sidebar() {
   const dispatch = useDispatch();
   const { currentUser, messages } = useSelector((state) => state);
   const location = useLocation();
+  // Misiones cumplidas sin cobrar: globito en "Misiones" (se vuelve a mirar al cambiar de página).
+  const { data: missions } = useMissions(currentUser?.id, location.pathname);
 
   // Mods ven el panel de admin igual que los admins (todo excepto gestión de roles).
   const canAccessAdminPanel = currentUser?.role === "admin" || currentUser?.role === "mod";
@@ -38,6 +41,7 @@ export default function Sidebar() {
   const accountItems = [
     { to: "/chips", icon: "paid", label: t("sidebar.comprarFichas"), color: "#4caf7d" },
     { to: "/chips?tab=history", icon: "receipt_long", label: t("sidebar.historial"), color: "#4f8fe0" },
+    { to: "/misiones", icon: "flag", label: t("sidebar.misiones"), badge: missions?.claimable || 0, color: "#e6c364" },
   ];
 
   const socialItems = [
@@ -58,6 +62,7 @@ export default function Sidebar() {
     ...(currentUser?.role === "admin" ? [{ to: "/admin/deposits", icon: "payments", label: t("sidebar.cargas"), color: "#4caf7d" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/staff-chips", icon: "badge", label: t("sidebar.fichasStaff"), color: "#e6c364" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/game-stats", icon: "query_stats", label: t("sidebar.estadisticasJuegos"), color: "#e6c364" }] : []),
+    ...(currentUser?.role === "admin" ? [{ to: "/admin/rtp", icon: "tune", label: t("sidebar.rtp"), color: "#e05252" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/promos", icon: "campaign", label: t("sidebar.promociones"), color: "#2dd4bf" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/ofertas", icon: "sell", label: t("sidebar.ofertas"), color: "#e6c364" }] : []),
     { to: "/admin/prizes", icon: "emoji_events", label: t("sidebar.premios"), color: "#a855f7" },
@@ -75,16 +80,17 @@ export default function Sidebar() {
     <NavLink
       key={to}
       to={to}
+      style={{ "--c": color }}
       className={({ isActive }) =>
         `group relative flex items-center justify-center lg:justify-start gap-3 w-12 h-12 lg:w-full lg:h-auto lg:px-3 lg:py-2.5 rounded-lg transition-colors duration-200 ${
           isActive
-            ? "hud-side-link is-active text-primary"
-            : "hud-side-link text-on-surface-variant hover:text-primary"
+            ? "hud-side-link is-active"
+            : "hud-side-link text-on-surface-variant"
         }`
       }
     >
-      <span className="relative material-symbols-outlined text-[22px]" style={{ color }}>
-        {icon}
+      <span className="hud-side-icon relative flex-shrink-0">
+        <span className="material-symbols-outlined text-[20px]" style={{ color }}>{icon}</span>
         {!!badge && (
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-error border-2 border-surface" />
         )}
@@ -93,7 +99,7 @@ export default function Sidebar() {
         {label}
       </span>
       {!!badge && (
-        <span className="hidden lg:inline-flex ml-auto bg-primary text-black text-[0.625rem] font-bold rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">
+        <span className="hidden lg:inline-flex ml-auto bg-[#ec4899] text-white text-[0.625rem] font-bold rounded-full min-w-[18px] h-[18px] items-center justify-center px-1">
           {badge}
         </span>
       )}

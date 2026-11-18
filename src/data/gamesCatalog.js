@@ -1,12 +1,23 @@
+import { LOCALE } from "../i18n/locale";
 import rjImage from "../assets/rj.png";
 import minasImage from "../assets/minas2.png";
 import pachinkaImage from "../assets/rpachinka2.png";
 import bingoImage from "../assets/bingoproxi.png";
 import ruletaImage from "../assets/ruleta.png";
 import blackjackImage from "../assets/blackjack.jpg";
+import pokerImage from "../assets/poker.jpg";
+import bichoImage from "../assets/bicho.jpg";
 import buracoImage from "../assets/buraco.jpg";
 import gemaOfGoldImage from "../assets/gemaOfGold.png";
 import dominoImage from "../assets/domino.png";
+import jokerWildsImage from "../assets/jokerwilds.jpg";
+import sweetTreatsImage from "../assets/sweettreats.jpg";
+import gomitasImage from "../assets/gomitas.jpg";
+import oceanRichesImage from "../assets/oceanriches.jpg";
+import gamerZoneImage from "../assets/gamerzone.jpg";
+import royalCatsImage from "../assets/royalcats.jpg";
+import sweetFuturistImage from "../assets/sweetfuturist.jpg";
+import chinchonImage from "../assets/chinchon.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
 // la categoría necesita notarse de un vistazo (ej. la grilla de "Juegos Populares" del Home) en
@@ -131,6 +142,66 @@ export const GAMES_CATALOG = [
       "Tragamonedas del antiguo Egipto con rodillos escalonados y 720 formas de ganar. Tres scatter dan tiradas gratis y el bonus de los huevos suma multiplicadores.",
   },
   {
+    slug: "jokerwilds",
+    name: "Joker Wilds",
+    category: "slots",
+    status: "active",
+    image: jokerWildsImage,
+    icon: "theater_comedy",
+    players: 0,
+    playPath: "/game/jokerwilds",
+    description:
+      "Tragamonedas del bufón: 5 rodillos con Joker, coronas, cofres y gemas. Cada símbolo paga en rodillos seguidos desde el primero, en cualquier fila; 5 Joker pagan 2.000 veces la apuesta.",
+  },
+  {
+    slug: "sweettreats",
+    name: "Sweet Treats",
+    category: "slots",
+    status: "active",
+    image: sweetTreatsImage,
+    icon: "cake",
+    players: 0,
+    playPath: "/game/sweettreats",
+    description:
+      "Tragamonedas de bombones en cascada: 4 o más iguales en cualquier lugar explotan y caen nuevos. Los multiplicadores multiplican el premio y 3 FREE SPIN dan 10 giros gratis.",
+  },
+  {
+    slug: "gomitas",
+    name: "Gomitas Espaciales",
+    category: "slots",
+    status: "active",
+    image: gomitasImage,
+    icon: "rocket_launch",
+    players: 0,
+    playPath: "/game/gomitas",
+    description:
+      "Tragamonedas neón de ositos de gomita en el espacio: 243 formas de ganar. 3 platillos dan giros gratis con premios x3 y 3 máquinas abren el bonus de la máquina de gomitas.",
+  },
+  {
+    slug: "oceanriches",
+    name: "Ocean Riches",
+    category: "slots",
+    status: "active",
+    image: oceanRichesImage,
+    icon: "sailing",
+    players: 0,
+    playPath: "/game/oceanriches",
+    description:
+      "Tragamonedas de pesca en el fondo del mar: 243 formas de ganar. Los peces traen premios y el pescador los recoge; el pelícano los multiplica, la marea sube en los giros gratis y 3 cofres abren la pesca en el fondo.",
+  },
+  {
+    slug: "gamerzone",
+    name: "Gamer Zone",
+    category: "slots",
+    status: "active",
+    image: gamerZoneImage,
+    icon: "sports_esports",
+    players: 0,
+    playPath: "/game/gamerzone",
+    description:
+      "Tragamonedas neón arcade: 243 formas de ganar con controles, consolas y máquinas de arcade. 3 estrellas SCATTER dan giros gratis donde el WILD se expande y cubre todo el rodillo.",
+  },
+  {
     slug: "bingo",
     name: "Royal Bingo",
     category: "bingo",
@@ -161,6 +232,19 @@ export const GAMES_CATALOG = [
       "La tradicional lotería de animales llega a RoyalGames. Elige tu bicho de la suerte y apuesta a que sea el ganador del sorteo.",
   },
   {
+    slug: "bicho",
+    showOnHome: false,
+    name: "Juego del Bicho",
+    category: "casino",
+    status: "soon",
+    image: bichoImage,
+    icon: "pets",
+    players: 0,
+    playPath: "/game/bicho",
+    description:
+      "Elegí entre 25 animales y esperá el sorteo: cada minuto gira el bolillero para todos. Si sale tu animal, ganás 24 veces lo apostado.",
+  },
+  {
     slug: "royal-ruleta",
     name: "Royal Ruleta",
     category: "casino",
@@ -168,7 +252,9 @@ export const GAMES_CATALOG = [
     image: ruletaImage,
     icon: "donut_large",
     players: 1120,
-    playPath: "/game/royalruleta",
+    // En el sitio en portugues la direccion es /game/royalroleta (las dos abren la ruleta)
+    playPath: LOCALE === "pt" ? "/game/royalroleta" : "/game/royalruleta",
+    playPathAliases: ["/game/royalruleta", "/game/royalroleta"],
     description:
       "Ruleta europea con mesas compartidas. Apuesta a tu número, color o docena favorita y deja girar la rueda.",
   },
@@ -204,10 +290,13 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-poker",
-    name: "RoyalPoker",
+    name: "Poker Texas Hold'em",
     category: "cartas",
-    status: "soon",
+    status: "active",
+    image: pokerImage,
     icon: "casino",
+    players: 0,
+    playPath: "/game/poker",
     description:
       "El Texas Hold'em de siempre, con la mesa de RoyalGames: leé a tus rivales, armá tu jugada y llevate el pozo.",
   },
@@ -233,7 +322,44 @@ export const GAMES_CATALOG = [
       "Armá tríos y escaleras antes que tus rivales en este clásico de mesa sudamericano, ahora online contra otros jugadores de RoyalGames.",
   },
   {
+    slug: "royalcats",
+    name: "Royal Cats",
+    category: "slots",
+    status: "active",
+    image: royalCatsImage,
+    icon: "pets",
+    players: 0,
+    playPath: "/game/royalcats",
+    description:
+      "Gatos reales llenos de joyas: 243 formas de ganar, giros gratis con WILD que quedan pegados y un bonus de ovillos para elegir premios.",
+  },
+  {
+    slug: "sweetfuturist",
+    name: "Sweet Futurist",
+    category: "slots",
+    status: "active",
+    image: sweetFuturistImage,
+    icon: "rocket_launch",
+    players: 0,
+    playPath: "/game/sweetfuturist",
+    description:
+      "Chocolates de neón en una ciudad del futuro: 243 formas de ganar, giros gratis con WILD que quedan pegados y un bonus de regalos neón con multiplicadores.",
+  },
+  {
+    slug: "chinchon",
+    name: "Chinchón",
+    category: "cartas",
+    status: "active",
+    image: chinchonImage,
+    icon: "style",
+    players: 0,
+    playPath: "/game/chinchon",
+    description:
+      "El clásico juego de cartas españolas: armá escaleras y grupos, cortá a tiempo y buscá el chinchón.",
+  },
+  {
     slug: "pearl-empires",
+    showOnHome: false,
     name: "Pearl Empires",
     category: "slots",
     status: "soon",
@@ -243,6 +369,7 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-gods",
+    showOnHome: false,
     name: "RoyalGods",
     category: "slots",
     status: "soon",
@@ -252,6 +379,7 @@ export const GAMES_CATALOG = [
   },
   {
     slug: "royal-futbol",
+    showOnHome: false,
     name: "RoyalFutbol",
     category: "slots",
     status: "soon",
@@ -324,7 +452,32 @@ export const GAMES_CATALOG = [
 
 export const getGameBySlug = (slug) => GAMES_CATALOG.find((game) => game.slug === slug);
 
-export const getGameByPlayPath = (path) => GAMES_CATALOG.find((game) => game.playPath === path);
+/** La app (Android) manda su actividad como "app:" + la misma ruta de la web, ej. "app:/game/bingo". */
+export const isAppActivity = (path) => typeof path === "string" && path.startsWith("app:");
+export const stripAppPrefix = (path) => (isAppActivity(path) ? path.slice(4) : path);
+
+export const getGameByPlayPath = (rawPath) => {
+  const path = stripAppPrefix(rawPath);
+  return GAMES_CATALOG.find((game) => game.playPath === path || (game.playPathAliases || []).includes(path));
+};
 
 export const getGamesByCategory = (category) =>
   GAMES_CATALOG.filter((game) => game.category === category);
+
+/**
+ * Jugadores que se muestran en las tarjetas y en la página de cada juego. Los "players" del
+ * catálogo son un peso fijo, no gente real: los juegos sin número muestran entre 10 y 20, y los
+ * de miles se bajan a algo creíble (aprox. 30 a 80). Varía un poco cada 10 minutos, igual para
+ * todos los jugadores, así no salta en cada recarga.
+ */
+export const getDisplayedPlayers = (game) => {
+  if (!game) return 0;
+  const slug = String(game.slug || game.name || "");
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) hash = (hash * 31 + slug.charCodeAt(i)) | 0;
+  const window = Math.floor(Date.now() / (10 * 60 * 1000));
+  const jitter = (Math.abs(hash + window * 2654435761) % 7) - 3; // -3..+3
+  const base = Number(game.players) || 0;
+  if (base <= 0) return 15 + Math.round((jitter * 5) / 3); // 10..20
+  return Math.max(21, Math.round(20 + base / 55) + jitter);
+};

@@ -31,6 +31,34 @@ export const HUB_SLOTS = {
     title: "Gilded Cobra",
     url: withPlayer("https://gildedcobra.s3.us-east-2.amazonaws.com/gildedcobra/index.html"),
   },
+  jokerwilds: {
+    title: "Joker Wilds",
+    url: withPlayer("https://jokerwilds.s3.us-east-2.amazonaws.com/jokerwilds/index.html"),
+  },
+  sweettreats: {
+    title: "Sweet Treats",
+    url: withPlayer("https://sweettreatsroyal.s3.us-east-2.amazonaws.com/sweettreats/index.html"),
+  },
+  gomitas: {
+    title: "Gomitas Espaciales",
+    url: withPlayer("https://gomitas.s3.us-east-2.amazonaws.com/gomitas/index.html"),
+  },
+  oceanriches: {
+    title: "Ocean Riches",
+    url: withPlayer("https://oceanrich.s3.us-east-2.amazonaws.com/oceanriches/index.html"),
+  },
+  gamerzone: {
+    title: "Gamer Zone",
+    url: withPlayer("https://gamerzoneroyal.s3.us-east-2.amazonaws.com/gamerzone/index.html"),
+  },
+  royalcats: {
+    title: "Royal Cats",
+    url: withPlayer("https://royalcats.s3.us-east-2.amazonaws.com/royalcats/index.html"),
+  },
+  sweetfuturist: {
+    title: "Sweet Futurist",
+    url: withPlayer("https://sweetfuturist.s3.us-east-2.amazonaws.com/sweetfuturist/index.html"),
+  },
   gemaofgold: {
     title: "Gema of Gold",
     url: withPlayer("https://gemaofgold.s3.us-east-2.amazonaws.com/Gemaofgold/index.html"),

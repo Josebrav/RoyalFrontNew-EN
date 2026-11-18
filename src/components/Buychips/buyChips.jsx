@@ -49,6 +49,17 @@ const BASE_CHIPS_PER_UNIT = { USD: 500_000, EUR: 500_000, ARS: 500, BRL: 100_000
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
 // Tilde en la esquina de una opción elegida.
+function StepBadge({ n, color }) {
+  return (
+    <span
+      className="inline-flex w-5 h-5 mr-1.5 rounded-full items-center justify-center text-[0.6875rem] font-black text-white align-middle"
+      style={{ background: color, boxShadow: `0 0 10px ${color}` }}
+    >
+      {n}
+    </span>
+  );
+}
+
 function SelectedMark() {
   return (
     <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-md">
@@ -74,7 +85,7 @@ const IMAGE_BY_BASE_CHIPS = {
   2_600_000_000: veinticeisb,
 };
 // 2026-11-18: todos los paquetes dan 50% más (igual que el backend). `offerChips` es el valor de
-// antes: las ofertas express multiplican ese, así se ven y acreditan igual que antes.
+// antes: las ofertas express (ej. la 6x1 de lau) multiplican ese, así se ven y acreditan igual que antes.
 const PACKAGE_BOOST = 1.5;
 const tiers = (currency, firstId, rows) =>
   rows.map(([price, chips], i) => ({ id: firstId + i, currency, price, chips: Math.round(chips * PACKAGE_BOOST), offerChips: chips }));
@@ -107,6 +118,7 @@ const HISTORY_TYPE_LABELS = {
   prize: "Premio",
   gift_sent: "Regalo Enviado",
   gift_received: "Regalo Recibido",
+  mission: "Premio de Misión",
 };
 
 export default function BuyChips() {
@@ -204,8 +216,15 @@ export default function BuyChips() {
   // Oferta vigente (panel -> Ofertas) en la moneda de este jugador, si la tiene. Fichas y precio los
   // decide el backend a partir del packageId, igual que con los paquetes de siempre.
   const [currentOffer, setCurrentOffer] = useState(null);
+  // Hasta saber si tiene oferta no se muestran los paquetes: con oferta express se ven con otros
+  // valores, y no queremos que se vean un instante los de sin oferta.
+  const [offerLoaded, setOfferLoaded] = useState(false);
   useEffect(() => {
-    axios.get(`${API_URL}/chip-offers/current`).then(({ data }) => setCurrentOffer(data?.offer ?? null)).catch(() => {});
+    axios
+      .get(`${API_URL}/chip-offers/current`)
+      .then(({ data }) => setCurrentOffer(data?.offer ?? null))
+      .catch(() => {})
+      .finally(() => setOfferLoaded(true));
   }, [currentUser?.id]);
 
   // Link de oferta de un solo uso (/chips?oferta=CODIGO): se guarda por si primero tiene que iniciar
@@ -266,6 +285,8 @@ export default function BuyChips() {
   const visibleChipOptions = CHIP_CATALOG[catalogCurrency].map((chip) =>
     offerMultiplier > 1 ? { ...chip, chips: chip.offerChips * offerMultiplier } : chip,
   );
+  // "Mejor valor": el paquete con mas bonus (mas fichas por cada peso o dolar).
+  const bestValueId = visibleChipOptions.reduce((best, c) => (!best || promoPercentOf(c) > promoPercentOf(best) ? c : best), null)?.id;
   const offerItem = currentOffer?.items.find((item) => item.currency === catalogCurrency);
   const offerChip = offerItem ? { id: offerItem.packageId, currency: offerItem.currency, price: offerItem.price, chips: offerItem.chips } : null;
   useEffect(() => {
@@ -479,11 +500,11 @@ export default function BuyChips() {
 
         {/* Page Header (compacto: la idea es que el depósito entero entre en una pantalla) */}
         <header className="mb-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <h1 className="text-3xl font-black text-primary tracking-tight flex items-center gap-2">
-            <span className="material-symbols-outlined text-[30px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <h1 className="text-3xl font-black tracking-tight flex items-center gap-2">
+            <span className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] shadow-[0_0_18px_rgba(139,92,246,0.55)] material-symbols-outlined text-[24px] text-white" style={{ fontVariationSettings: "'FILL' 1" }}>
               account_balance_wallet
             </span>
-            Billetera Royal
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffe08f] via-[#f9a8d4] to-[#7dd3fc]">Billetera Royal</span>
           </h1>
           <p className="text-sm text-on-surface-variant">
             Administra tus fondos, adquiere fichas y gestiona tus transacciones seguras.
@@ -499,15 +520,18 @@ export default function BuyChips() {
         </header>
 
         {/* Interactive Workspace Panel */}
-        <div className="glass-card rounded-2xl overflow-hidden mb-6 shadow-2xl">
+        <div className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl border border-[#8b5cf6]/30 bg-[#0d0f1f]">
+          <div className="pointer-events-none absolute -top-32 -left-24 w-96 h-96 rounded-full bg-[#8b5cf6]/25 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -right-24 w-96 h-96 rounded-full bg-[#06b6d4]/20 blur-3xl" />
+          <div className="pointer-events-none absolute top-1/3 left-1/2 w-80 h-80 rounded-full bg-[#ec4899]/10 blur-3xl" />
 
           {/* Navigation Tabs */}
-          <div className="flex border-b border-outline-variant/10 bg-[#12121A]/80">
+          <div className="relative flex border-b border-[#8b5cf6]/25 bg-[#0a0b18]/80">
             <button
               onClick={() => setActiveTab("deposit")}
               className={`flex-1 py-2.5 text-sm transition-all border-b-2 font-bold ${
                 activeTab === "deposit"
-                  ? "text-primary border-primary bg-primary/5"
+                  ? "text-white border-[#a78bfa] bg-gradient-to-r from-[#8b5cf6]/30 to-[#3b82f6]/25"
                   : "text-on-surface-variant hover:text-on-surface border-transparent"
               }`}
             >
@@ -517,7 +541,7 @@ export default function BuyChips() {
               onClick={() => setActiveTab("history")}
               className={`flex-1 py-2.5 text-sm transition-all border-b-2 font-bold ${
                 activeTab === "history"
-                  ? "text-primary border-primary bg-primary/5"
+                  ? "text-white border-[#a78bfa] bg-gradient-to-r from-[#8b5cf6]/30 to-[#3b82f6]/25"
                   : "text-on-surface-variant hover:text-on-surface border-transparent"
               }`}
             >
@@ -525,7 +549,7 @@ export default function BuyChips() {
             </button>
           </div>
 
-          <div className="p-4 md:p-6">
+          <div className="relative p-4 md:p-6">
 
             {/* VIEW 1: DEPOSIT & CHECKOUT — tres franjas: opciones, paquetes en una fila, cobro */}
             {activeTab === "deposit" && regionLoading && (
@@ -540,13 +564,13 @@ export default function BuyChips() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
                   {/* Step 1: Payment country (primero: los precios de los paquetes dependen de él) */}
-                  <div className="lg:col-span-5 rounded-2xl border border-outline-variant/25 bg-black/25 p-3">
-                    <label className="text-xs font-bold text-primary mb-2 block uppercase tracking-wider">
-                      1. {viewerIsAdmin ? "País desde el que pagás" : "Tu país"}
+                  <div className="lg:col-span-5 rounded-2xl border border-[#22d3ee]/35 bg-gradient-to-br from-[#06b6d4]/15 to-[#0a0b18]/60 p-3">
+                    <label className="text-xs font-bold text-[#67e8f9] mb-2 block uppercase tracking-wider">
+                      <StepBadge n={1} color="#06b6d4" />{viewerIsAdmin ? "País desde el que pagás" : "Tu país"}
                     </label>
                     {!viewerIsAdmin && (
-                      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 border-primary bg-primary/10">
-                        <span className="material-symbols-outlined text-primary">public</span>
+                      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 border-[#22d3ee] bg-[#06b6d4]/15">
+                        <span className="material-symbols-outlined text-[#67e8f9]">public</span>
                         <span className="min-w-0">
                           <span className="block text-sm font-bold text-white">{regionConfig.label}</span>
                           <span className="block text-[0.6875rem] text-on-surface-variant">
@@ -565,8 +589,8 @@ export default function BuyChips() {
                           aria-pressed={region === key}
                           className={`px-2 py-2.5 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
                             region === key
-                              ? "royal-gold-gradient border-primary text-[#0A0A0F] shadow-[0_0_14px_rgba(230,195,100,0.55)]"
-                              : "glass-card border-outline-variant/30 text-on-surface-variant hover:border-primary/45 hover:text-white"
+                              ? "bg-gradient-to-b from-[#67e8f9] to-[#0891b2] border-[#a5f3fc] text-[#04232a] shadow-[0_0_14px_rgba(34,211,238,0.6)]"
+                              : "bg-[#0a0b18]/60 border-[#22d3ee]/25 text-on-surface-variant hover:border-[#22d3ee]/70 hover:text-white"
                           }`}
                         >
                           {PAYMENT_REGIONS[key].label}
@@ -582,9 +606,9 @@ export default function BuyChips() {
                   </div>
 
                   {/* Step 2: Payment method (antes de los paquetes: define la moneda de los precios) */}
-                  <div className="lg:col-span-4 rounded-2xl border border-outline-variant/25 bg-black/25 p-3">
-                    <label className="text-xs font-bold text-primary mb-2 block uppercase tracking-wider">
-                      2. Medio de Pago
+                  <div className="lg:col-span-4 rounded-2xl border border-[#a78bfa]/35 bg-gradient-to-br from-[#8b5cf6]/18 to-[#0a0b18]/60 p-3">
+                    <label className="text-xs font-bold text-[#c4b5fd] mb-2 block uppercase tracking-wider">
+                      <StepBadge n={2} color="#8b5cf6" />Medio de Pago
                     </label>
                     {availableMethods.length === 0 && (
                       <p className="text-xs text-on-surface-variant">
@@ -599,8 +623,8 @@ export default function BuyChips() {
                           aria-pressed={paymentMethod === "mercadopago"}
                           className={`glass-card relative px-2.5 py-2 rounded-xl flex items-center gap-2 text-left border-2 transition-all cursor-pointer ${
                             paymentMethod === "mercadopago"
-                              ? "border-primary bg-primary/20 shadow-[0_0_14px_rgba(230,195,100,0.45)]"
-                              : "border-outline-variant/30 opacity-70 hover:opacity-100 hover:border-primary/45"
+                              ? "border-[#a78bfa] bg-[#8b5cf6]/25 shadow-[0_0_14px_rgba(139,92,246,0.55)]"
+                              : "border-[#a78bfa]/25 opacity-75 hover:opacity-100 hover:border-[#a78bfa]/70"
                           }`}
                         >
                           {paymentMethod === "mercadopago" && <SelectedMark />}
@@ -620,8 +644,8 @@ export default function BuyChips() {
                           aria-pressed={paymentMethod === "asaas"}
                           className={`glass-card relative px-2.5 py-2 rounded-xl flex items-center gap-2 text-left border-2 transition-all cursor-pointer ${
                             paymentMethod === "asaas"
-                              ? "border-primary bg-primary/20 shadow-[0_0_14px_rgba(230,195,100,0.45)]"
-                              : "border-outline-variant/30 opacity-70 hover:opacity-100 hover:border-primary/45"
+                              ? "border-[#a78bfa] bg-[#8b5cf6]/25 shadow-[0_0_14px_rgba(139,92,246,0.55)]"
+                              : "border-[#a78bfa]/25 opacity-75 hover:opacity-100 hover:border-[#a78bfa]/70"
                           }`}
                         >
                           {paymentMethod === "asaas" && <SelectedMark />}
@@ -641,8 +665,8 @@ export default function BuyChips() {
                           aria-pressed={paymentMethod === "paypal"}
                           className={`glass-card relative px-2.5 py-2 rounded-xl flex items-center gap-2 text-left border-2 transition-all cursor-pointer ${
                             paymentMethod === "paypal"
-                              ? "border-primary bg-primary/20 shadow-[0_0_14px_rgba(230,195,100,0.45)]"
-                              : "border-outline-variant/30 opacity-70 hover:opacity-100 hover:border-primary/45"
+                              ? "border-[#a78bfa] bg-[#8b5cf6]/25 shadow-[0_0_14px_rgba(139,92,246,0.55)]"
+                              : "border-[#a78bfa]/25 opacity-75 hover:opacity-100 hover:border-[#a78bfa]/70"
                           }`}
                         >
                           {paymentMethod === "paypal" && <SelectedMark />}
@@ -659,17 +683,17 @@ export default function BuyChips() {
                   </div>
 
                   {/* Balance y rango */}
-                  <div className="lg:col-span-3 rounded-2xl border border-outline-variant/25 bg-black/25 p-3">
-                    <p className="text-xs font-bold text-primary mb-2 uppercase tracking-wider">Tu cuenta</p>
+                  <div className="lg:col-span-3 rounded-2xl border border-[#34d399]/30 bg-gradient-to-br from-[#10b981]/12 to-[#0a0b18]/60 p-3">
+                    <p className="text-xs font-bold text-[#6ee7b7] mb-2 uppercase tracking-wider">Tu cuenta</p>
                     <div className="grid grid-cols-2 gap-2">
-                    <div className="glass-card px-3 py-2 rounded-xl">
-                      <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Mi Balance</p>
+                    <div className="px-3 py-2 rounded-xl border border-[#34d399]/30 bg-gradient-to-br from-[#10b981]/25 to-[#064e3b]/30">
+                      <p className="text-[0.625rem] text-[#a7f3d0] uppercase tracking-wider font-bold">Mi Balance</p>
                       <p className="text-sm font-bold text-white leading-tight break-all">
                         {new Intl.NumberFormat('es-ES').format(currentUser?.chips || 0)}
                       </p>
                       <p className="text-[0.625rem] text-green-400">Disponible para jugar</p>
                     </div>
-                    <div className="glass-card px-3 py-2 rounded-xl">
+                    <div className="px-3 py-2 rounded-xl border border-[#60a5fa]/30 bg-gradient-to-br from-[#3b82f6]/25 to-[#1e3a8a]/30">
                       <div className="flex items-center justify-between gap-1">
                         <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Rango</p>
                         <RankBadge tier={rankStatus?.rank || currentUser?.rank} size="sm" />
@@ -698,15 +722,15 @@ export default function BuyChips() {
 
                 {/* Franja 2: paquetes, todos en una fila en pantallas grandes */}
                 <div>
-                  <label className="text-xs font-bold text-primary mb-2 block uppercase tracking-wider">
-                    3. Selecciona un Paquete de Fichas
+                  <label className="text-xs font-bold text-[#f9a8d4] mb-2 block uppercase tracking-wider">
+                    <StepBadge n={3} color="#ec4899" />Selecciona un Paquete de Fichas
                   </label>
                   {offerMultiplier > 1 && (
-                    <div className="w-full mb-4 rounded-xl border-2 border-primary bg-primary/15 p-3 flex items-center gap-3 text-left">
+                    <div className="w-full mb-4 rounded-xl border-2 border-[#f472b6] bg-gradient-to-r from-[#ec4899]/30 via-[#8b5cf6]/25 to-[#06b6d4]/20 p-3 flex items-center gap-3 text-left shadow-[0_0_20px_rgba(236,72,153,0.3)]">
                       <img src={currentOffer.imageUrl} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
                       <span className="min-w-0">
                         <span className="block text-white font-bold truncate">{currentOffer.title}</span>
-                        <span className="block text-sm text-primary font-bold">Todos los paquetes dan x{offerMultiplier} fichas</span>
+                        <span className="block text-sm text-[#fbcfe8] font-bold">Todos los paquetes dan x{offerMultiplier} fichas</span>
                       </span>
                     </div>
                   )}
@@ -732,13 +756,15 @@ export default function BuyChips() {
                     </button>
                   )}
                   <div
-                    className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[repeat(var(--pkg-cols),minmax(0,1fr))] gap-3"
+                    className={`grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[repeat(var(--pkg-cols),minmax(0,1fr))] gap-3 pt-3 transition-opacity ${offerLoaded ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                     style={{ "--pkg-cols": visibleChipOptions.length }}
                   >
                     {visibleChipOptions.map((chip) => {
                       const isSelected = selectedChip?.id === chip.id;
                       const baseChips = baseChipsOf(chip);
                       const image = IMAGE_BY_BASE_CHIPS[baseChips];
+                      const bestValue = chip.id === bestValueId;
+                      const chipsText = formatChips(chip.chips);
                       return (
                         <div
                           key={chip.id}
@@ -752,54 +778,66 @@ export default function BuyChips() {
                             }
                           }}
                           aria-pressed={isSelected}
-                          className={`flex flex-col gap-1.5 text-center cursor-pointer select-none group relative active:scale-95 transition-all rounded-xl p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                          className={`group relative flex flex-col cursor-pointer select-none rounded-2xl p-[2px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                             isSelected
-                              ? "ring-4 ring-primary bg-primary/15 shadow-[0_0_22px_rgba(230,195,100,0.55)]"
-                              : "opacity-75 hover:opacity-100"
+                              ? "bg-gradient-to-b from-[#ffe08f] via-[#e6c364] to-[#8a6a1c] shadow-[0_0_28px_rgba(230,195,100,0.55)] -translate-y-1"
+                              : "bg-gradient-to-b from-[#e6c364]/40 via-[#e6c364]/10 to-[#e6c364]/30 hover:from-[#e6c364]/80 hover:to-[#e6c364]/60 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
                           }`}
                         >
-                          <div
-                            className={`relative w-full rounded-xl overflow-hidden border-2 transition-all ${
-                              isSelected
-                                ? "border-primary shadow-[0_0_15px_rgba(201,168,76,0.35)]"
-                                : "border-outline-variant/20 group-hover:border-primary/50"
-                            }`}
-                          >
-                            {isSelected && (
-                              <div className="absolute bottom-9 right-1.5 z-10 bg-primary rounded-full w-6 h-6 flex items-center justify-center shadow-md ring-2 ring-[#0A0A0F]">
-                                <span className="material-symbols-outlined text-[14px] text-[#0A0A0F] font-bold">check</span>
-                              </div>
-                            )}
-                            <EditableImage
-                              contentKey={`chips.packageImage.${baseChips}`}
-                              fallbackSrc={image}
-                              alt={`${formatChips(baseChips)} fichas`}
-                              className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
-                              recommendedSize={`cuadrada, 1000×1000px aprox., con el número ${formatChips(baseChips)}`}
-                              allowLink={false}
-                              placeholder={
-                                <div className="w-full h-full bg-gradient-to-b from-surface-container-high to-surface-container-lowest flex items-start justify-center pt-3">
-                                  <span className="text-white font-black text-sm [text-shadow:0_2px_4px_rgba(0,0,0,0.9)] whitespace-nowrap">
-                                    {formatChips(baseChips)}
-                                  </span>
-                                </div>
-                              }
-                            />
-                            <div className="bg-white py-1">
-                              <span className="text-sm font-black text-[#0A0A0F] whitespace-nowrap">
-                                {symbol} {formatPrice(chip)}
+                          {bestValue && (
+                            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap rounded-full bg-gradient-to-r from-[#ff5f6d] to-[#ffc371] px-2.5 py-0.5 text-[0.5625rem] font-black uppercase tracking-wider text-white shadow-[0_2px_8px_rgba(255,95,109,0.6)]">
+                              Mejor valor
+                            </span>
+                          )}
+                          <div className="relative flex flex-col h-full rounded-[14px] overflow-hidden bg-gradient-to-b from-[#1d1a2b] to-[#0d0c14]">
+                            {/* Imagen con el bonus en la esquina */}
+                            <div className="relative overflow-hidden">
+                              <EditableImage
+                                contentKey={`chips.packageImage.${baseChips}`}
+                                fallbackSrc={image}
+                                alt={`${formatChips(baseChips)} fichas`}
+                                className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
+                                recommendedSize={`cuadrada, 1000×1000px aprox., con el número ${formatChips(baseChips)}`}
+                                allowLink={false}
+                                placeholder={
+                                  <div className="w-full h-full bg-gradient-to-b from-surface-container-high to-surface-container-lowest flex items-start justify-center pt-3">
+                                    <span className="text-white font-black text-sm [text-shadow:0_2px_4px_rgba(0,0,0,0.9)] whitespace-nowrap">
+                                      {formatChips(baseChips)}
+                                    </span>
+                                  </div>
+                                }
+                              />
+                              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#1d1a2b] to-transparent" />
+                              {isSelected && (
+                                <span className="absolute top-1.5 right-1.5 z-10 bg-primary rounded-full w-6 h-6 flex items-center justify-center shadow-md ring-2 ring-[#0A0A0F]">
+                                  <span className="material-symbols-outlined text-[14px] text-[#0A0A0F] font-bold">check</span>
+                                </span>
+                              )}
+                            </div>
+                            {/* Franja roja con el bonus, justo entre la imagen y la parte de "Recibís" */}
+                            <div className="relative z-10 -mt-2.5 flex items-center justify-center gap-1.5 py-1 bg-gradient-to-r from-[#b8002a] via-[#ff1f4b] to-[#b8002a] text-white leading-none shadow-[0_0_12px_rgba(255,45,85,0.6)] border-y border-[#ffb3c1]/60 whitespace-nowrap">
+                              <span className="text-sm sm:text-base font-black tracking-tight [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">+{promoPercentOf(chip)}%</span>
+                              <span className="text-[0.5625rem] font-black uppercase tracking-[0.15em] text-[#ffe3e8]">extra</span>
+                            </div>
+                            {/* Lo que recibe (y tachado, lo que daria sin bonus) */}
+                            <div className="flex-1 flex flex-col items-center justify-center px-1 pt-1.5 pb-2 leading-tight">
+                              <span className="text-[0.625rem] uppercase tracking-[0.12em] text-[#f5d980] font-black">Recibís</span>
+                              <span className={`font-black text-transparent bg-clip-text bg-gradient-to-b from-[#fffbe6] via-[#ffe08f] to-[#e6b84c] whitespace-nowrap [filter:drop-shadow(0_0_6px_rgba(247,205,79,0.55))] ${chipsText.length > 13 ? "text-sm" : chipsText.length > 10 ? "text-base" : "text-lg"}`}>
+                                {chipsText}
+                              </span>
+                              <span className="text-[0.5625rem] text-on-surface-variant line-through decoration-[#ff3d5a]/80 whitespace-nowrap">
+                                {formatChips(baseChips)}
                               </span>
                             </div>
-                          </div>
-                          <div className="w-full rounded-xl border-2 border-yellow-400 bg-gradient-to-b from-yellow-100 to-yellow-200 px-1 py-1.5 leading-tight">
-                              <p className="text-base font-black text-yellow-700">+{promoPercentOf(chip)}%</p>
-                              <p className="text-[0.625rem] font-black text-yellow-700 uppercase tracking-wider">Bonus</p>
-                              <p className="text-[0.5625rem] text-neutral-600 mt-0.5">Recibís</p>
-                              <p className={`font-black text-neutral-900 whitespace-nowrap ${formatChips(chip.chips).length > 11 ? "text-[0.625rem]" : "text-xs"}`}>
-                                {formatChips(chip.chips)}
-                              </p>
-                              <p className="text-[0.5625rem] text-neutral-600">fichas</p>
+                            {/* Precio */}
+                            <div className={`mx-1.5 mb-1.5 rounded-lg py-1.5 text-center transition-colors ${
+                              isSelected
+                                ? "bg-gradient-to-b from-[#ffe08f] to-[#c9a84c] text-[#1a1206]"
+                                : "bg-white/5 text-white border border-[#e6c364]/30 group-hover:bg-[#e6c364]/15"
+                            }`}>
+                              <span className="text-sm font-black whitespace-nowrap">{symbol} {formatPrice(chip)}</span>
                             </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -807,13 +845,13 @@ export default function BuyChips() {
                 </div>
 
                 {/* Franja 3: resumen y cobro */}
-                <div className="glass-card rounded-2xl border border-outline-variant/20 bg-[#12121A]/60 p-4 flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="relative overflow-hidden rounded-2xl border border-[#818cf8]/40 bg-gradient-to-r from-[#1e1b4b] via-[#151735] to-[#0c4a6e]/60 p-4 flex flex-col lg:flex-row lg:items-center gap-4 shadow-[0_0_30px_rgba(99,102,241,0.25)]">
                   <div className="flex-1 min-w-0 flex flex-wrap items-end gap-x-8 gap-y-2">
                     <div>
                       <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Paquete</p>
-                      <p className="text-sm text-white font-bold">{selectedChip ? formatChips(selectedChip.chips) : "0"} fichas</p>
+                      <p className="text-lg text-white font-black">{selectedChip && offerLoaded ? formatChips(selectedChip.chips) : "—"} <span className="text-sm font-bold text-on-surface-variant">fichas</span></p>
                     </div>
-                    {rankBonusPercent > 0 && selectedChip && (
+                    {rankBonusPercent > 0 && selectedChip && offerLoaded && (
                       <div>
                         <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">
                           Bono {RANK_META[rankStatus?.rank]?.label || "de rango"} +{rankBonusPercent}%
@@ -825,11 +863,11 @@ export default function BuyChips() {
                     )}
                     <div>
                       <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Moneda</p>
-                      <p className="text-sm text-primary font-bold">{currency}</p>
+                      <p className="text-sm text-[#7dd3fc] font-bold">{currency}</p>
                     </div>
                     <div>
                       <p className="text-[0.625rem] text-on-surface-variant uppercase tracking-wider font-bold">Total a pagar</p>
-                      <p className="text-3xl font-black text-primary leading-none">
+                      <p className="text-4xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#fff3c4] to-[#e6c364]">
                         {symbol} {selectedChip ? formatPrice(selectedChip) : "0"}
                       </p>
                     </div>
@@ -1027,6 +1065,7 @@ export default function BuyChips() {
                               prize: { icon: "emoji_events", color: "text-primary" },
                               gift_sent: { icon: "card_giftcard", color: "text-error" },
                               gift_received: { icon: "card_giftcard", color: "text-green-400" },
+                              mission: { icon: "flag", color: "text-primary" },
                             }[item.type] || {
                               icon: item.chips >= 0 ? "add_circle" : "remove_circle",
                               color: item.chips >= 0 ? "text-green-400" : "text-error",

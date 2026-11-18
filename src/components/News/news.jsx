@@ -13,6 +13,13 @@ const TAG_META = {
   Novedad: "text-[#4f8fe0] bg-[#4f8fe0]/10 border-[#4f8fe0]/30",
 };
 
+const TAG_COLOR = {
+  Lanzamiento: "#f59e0b",
+  Juegos: "#a855f7",
+  Promoción: "#22c55e",
+  Novedad: "#3b82f6",
+};
+
 const TAG_ICON = {
   Lanzamiento: "rocket_launch",
   Juegos: "casino",
@@ -25,12 +32,33 @@ const TAG_OPTIONS = Object.keys(TAG_META);
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-const emptyForm = { titulo: "", texto: "", tag: TAG_OPTIONS[0], image: null };
+const emptyForm = { titulo: "", texto: "", tag: TAG_OPTIONS[0], image: null, linkTo: "", featured: false, featuredUntil: "" };
+
+// "2026-11-30T23:59" (input datetime-local, hora local) <-> ISO del servidor
+const toLocalInput = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+/** Ruta interna ("/game/...") o URL completa: las internas se abren en la misma pestaña. */
+const isExternalLink = (link) => /^https?:\/\//i.test(link || "");
 
 function NewsFormModal({ article, onClose, onSaved }) {
   const dispatch = useDispatch();
   const [form, setForm] = useState(
-    article ? { titulo: article.titulo, texto: article.texto, tag: article.tag, image: null } : emptyForm,
+    article
+      ? {
+          titulo: article.titulo,
+          texto: article.texto,
+          tag: article.tag,
+          image: null,
+          linkTo: article.linkTo || "",
+          featured: Boolean(article.featured),
+          featuredUntil: toLocalInput(article.featuredUntil),
+        }
+      : emptyForm,
   );
   const [saving, setSaving] = useState(false);
 
@@ -56,6 +84,15 @@ function NewsFormModal({ article, onClose, onSaved }) {
       Swal.fire({ title: "Faltan datos", text: "Completá título y texto.", icon: "warning", ...swalThemeConfig });
       return;
     }
+    const link = form.linkTo.trim();
+    if (link && !/^(\/\S*|https?:\/\/\S+)$/i.test(link)) {
+      Swal.fire({ title: "Enlace inválido", text: "Tiene que empezar con / (página del sitio) o con https://", icon: "warning", ...swalThemeConfig });
+      return;
+    }
+    if (form.featured && !form.image && !article?.imageUrl) {
+      Swal.fire({ title: "Falta el banner", text: "Para salir en primera plana la noticia necesita una imagen.", icon: "warning", ...swalThemeConfig });
+      return;
+    }
     setSaving(true);
     try {
       const formData = new FormData();
@@ -63,6 +100,9 @@ function NewsFormModal({ article, onClose, onSaved }) {
       formData.append("texto", form.texto.trim());
       formData.append("tag", form.tag);
       if (form.image) formData.append("image", form.image);
+      formData.append("linkTo", link);
+      formData.append("featured", form.featured ? "true" : "false");
+      formData.append("featuredUntil", form.featured && form.featuredUntil ? new Date(form.featuredUntil).toISOString() : "");
 
       if (article) {
         await dispatch(updateNewsArticle(article.id, formData));
@@ -150,6 +190,48 @@ function NewsFormModal({ article, onClose, onSaved }) {
             className="w-full text-on-surface-variant text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary/10 file:text-primary file:cursor-pointer"
             disabled={saving}
           />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[0.625rem] uppercase tracking-widest text-on-surface-variant">
+            Enlace al tocar el banner (opcional) — ej. /game/sweettreats o https://...
+          </label>
+          <input
+            type="text"
+            value={form.linkTo}
+            placeholder="/game/sweettreats"
+            onChange={(e) => setForm((prev) => ({ ...prev, linkTo: e.target.value }))}
+            className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-2.5 text-on-surface outline-none focus:border-primary"
+            disabled={saving}
+          />
+        </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-3">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.featured}
+              onChange={(e) => setForm((prev) => ({ ...prev, featured: e.target.checked }))}
+              className="w-5 h-5 accent-[#e9c349] cursor-pointer"
+              disabled={saving}
+            />
+            <span className="text-sm text-white font-bold">Mostrar en primera plana</span>
+          </label>
+          <p className="text-xs text-on-surface-variant -mt-1">
+            El banner aparece en el centro de la página, como las ofertas (una vez por día a cada visitante). Al tocarlo lleva al enlace.
+          </p>
+          {form.featured && (
+            <div className="space-y-1">
+              <label className="text-[0.625rem] uppercase tracking-widest text-on-surface-variant">Mostrar hasta (vacío = sin fecha de fin)</label>
+              <input
+                type="datetime-local"
+                value={form.featuredUntil}
+                onChange={(e) => setForm((prev) => ({ ...prev, featuredUntil: e.target.value }))}
+                className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-2.5 text-on-surface outline-none focus:border-primary"
+                disabled={saving}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
@@ -243,14 +325,14 @@ export default function News() {
     <main className="max-w-3xl mx-auto w-full pt-20 md:pt-24 px-4 pb-16 text-on-surface">
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-white mb-2">Noticias</h1>
+          <h1 className="font-headline-lg text-headline-lg text-white mb-2 flex items-center gap-3"><span className="w-11 h-11 rounded-xl inline-flex items-center justify-center bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] shadow-[0_0_18px_rgba(139,92,246,0.55)] material-symbols-outlined text-[26px] text-white" style={{ fontVariationSettings: "'FILL' 1" }}>newspaper</span><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffe08f] via-[#f9a8d4] to-[#7dd3fc]">Noticias</span></h1>
           <p className="text-on-surface-variant text-sm">Todo lo nuevo en RoyalGames.</p>
         </div>
         {canManage && (
           <button
             type="button"
             onClick={() => setFormState({})}
-            className="flex-shrink-0 px-4 py-2.5 rounded-lg gold-gradient text-black font-bold text-sm hover:brightness-110 transition-all cursor-pointer border-0 flex items-center gap-1.5"
+            className="flex-shrink-0 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow-[0_0_16px_rgba(139,92,246,0.45)] font-bold text-sm hover:brightness-110 transition-all cursor-pointer border-0 flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Crear Noticia
@@ -258,14 +340,14 @@ export default function News() {
         )}
       </div>
 
-      <div className="glass-card rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap mb-8">
-        <p className="text-on-surface-variant text-sm font-bold">Seguinos para no perderte nada</p>
+      <div className="relative overflow-hidden rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap mb-8 border border-[#f472b6]/35 bg-gradient-to-r from-[#ec4899]/20 via-[#8b5cf6]/15 to-[#06b6d4]/15 shadow-[0_0_20px_rgba(236,72,153,0.18)]">
+        <p className="text-white text-sm font-bold flex items-center gap-2"><span className="material-symbols-outlined text-[20px] text-[#f9a8d4]">favorite</span>Seguinos para no perderte nada</p>
         <div className="flex items-center gap-3">
           <a
             href={SOCIAL_LINKS.facebook}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors"
+            className="w-10 h-10 rounded-full bg-[#1877f2] border border-white/20 flex items-center justify-center text-white hover:brightness-110 shadow-[0_0_12px_rgba(24,119,242,0.5)] transition-all"
             aria-label="Facebook"
           >
             <FacebookIcon className="w-5 h-5" />
@@ -274,7 +356,7 @@ export default function News() {
             href={SOCIAL_LINKS.instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors"
+            className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f58529] via-[#dd2a7b] to-[#8134af] border border-white/20 flex items-center justify-center text-white hover:brightness-110 shadow-[0_0_12px_rgba(221,42,123,0.5)] transition-all"
             aria-label="Instagram"
           >
             <InstagramIcon className="w-5 h-5" />
@@ -293,24 +375,35 @@ export default function News() {
             <div
               key={novedad.id}
               id={`noticia-${novedad.id}`}
-              className={`glass-card rounded-xl p-5 flex gap-4 border-l-4 border-primary relative transition-shadow duration-500 ${
-                highlightedId === novedad.id ? "ring-2 ring-primary shadow-[0_0_24px_rgba(230,195,100,0.45)]" : ""
+              className={`rounded-xl p-5 flex gap-4 border border-l-4 relative transition-shadow duration-500 ${
+                highlightedId === novedad.id ? "ring-2 ring-white/70" : ""
               }`}
+              style={{
+                borderColor: `${TAG_COLOR[novedad.tag] || "#8b5cf6"}55`,
+                borderLeftColor: TAG_COLOR[novedad.tag] || "#8b5cf6",
+                background: `linear-gradient(120deg, ${TAG_COLOR[novedad.tag] || "#8b5cf6"}22, #0d0f1f 60%)`,
+                boxShadow: highlightedId === novedad.id ? `0 0 24px ${TAG_COLOR[novedad.tag] || "#8b5cf6"}88` : "0 6px 18px rgba(0,0,0,0.3)",
+              }}
             >
               {novedad.imageUrl ? (
                 <img
                   src={novedad.imageUrl}
                   alt={novedad.titulo}
-                  className="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-primary/30"
+                  className="w-11 h-11 rounded-full object-cover flex-shrink-0 border-2" style={{ borderColor: TAG_COLOR[novedad.tag] || "#8b5cf6" }}
                 />
               ) : (
-                <div className="w-11 h-11 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-primary text-[22px]">{TAG_ICON[novedad.tag] || "campaign"}</span>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: TAG_COLOR[novedad.tag] || "#8b5cf6", boxShadow: `0 0 14px ${TAG_COLOR[novedad.tag] || "#8b5cf6"}99` }}>
+                  <span className="material-symbols-outlined text-white text-[22px]">{TAG_ICON[novedad.tag] || "campaign"}</span>
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <h3 className="font-bold text-white">{novedad.titulo}</h3>
+                  {canManage && novedad.featured && (
+                    <span className="text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border flex-shrink-0 text-primary bg-primary/10 border-primary/40">
+                      Primera plana
+                    </span>
+                  )}
                   <span className={`text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border flex-shrink-0 ${TAG_META[novedad.tag] || ""}`}>
                     {novedad.tag}
                   </span>
@@ -332,7 +425,7 @@ export default function News() {
                           type="button"
                           onClick={() => toggleExpanded(novedad.id)}
                           aria-expanded={isExpanded}
-                          className="mt-2 text-xs font-bold text-primary hover:underline cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
+                          className="mt-2 text-xs font-bold text-[#7dd3fc] hover:underline cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
                         >
                           {isExpanded ? "Ver menos" : "Ver más"}
                           <span className="material-symbols-outlined text-[16px]">
@@ -343,6 +436,16 @@ export default function News() {
                     </>
                   );
                 })()}
+                {novedad.linkTo && (
+                  <a
+                    href={novedad.linkTo}
+                    {...(isExternalLink(novedad.linkTo) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="mt-3 inline-flex items-center gap-1 px-4 py-1.5 rounded-lg gold-gradient text-black text-xs font-bold uppercase tracking-wider no-underline hover:brightness-110"
+                  >
+                    Ver más
+                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </a>
+                )}
               </div>
               {canManage && (
                 <div className="flex flex-col gap-1.5 flex-shrink-0">
@@ -382,7 +485,7 @@ export default function News() {
           <button
             onClick={nextPage}
             disabled={currentPage === totalPages}
-            className="px-5 py-2 rounded-lg gold-gradient text-black font-bold text-sm hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-0"
+            className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow-[0_0_16px_rgba(139,92,246,0.45)] font-bold text-sm hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-0"
           >
             Siguiente
           </button>

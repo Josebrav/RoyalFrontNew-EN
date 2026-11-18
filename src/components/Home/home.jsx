@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
@@ -16,11 +16,13 @@ import { formatChips, swalThemeConfig } from "../../utils/formatters";
 import GamesCatalog from "../GamesCatalog/gamesCatalog";
 import DailySpinModal from "../DailySpin/DailySpinModal";
 import DailyBonusModal from "../DailyBonus/DailyBonusModal";
+import MissionsCard from "../Missions/missionsCard";
 import EditableText from "../ui/EditableText";
 import EditableImage from "../ui/EditableImage";
 import BannerCarousel from "../ui/BannerCarousel";
-import { GAMES_CATALOG, CATEGORY_META, getGameByPlayPath, getGameBySlug } from "../../data/gamesCatalog";
-import { generateFakeOnlinePlayers } from "../../data/fakeOnlinePlayers";
+import { GAMES_CATALOG, CATEGORY_META, getDisplayedPlayers, getGameBySlug } from "../../data/gamesCatalog";
+import { useOrderedGames } from "../../data/gameOrder";
+import GameOrderEditor from "../ui/GameOrderEditor";
 import { fetchUserProfile, getUserByEmail } from "../../redux/actions";
 import API_URL from "../../api/rutaApi";
 import { useAuth } from "../../context/oauthContext";
@@ -29,15 +31,26 @@ import { LOCALE } from "../../i18n/locale";
 import SeoIntro from "./seoIntro";
 import { POINTS_AND_TOURNAMENTS_NEWS_ID, newsArticlePath } from "../../data/newsLinks";
 
-const SIMULATED_ONLINE_MIN = 18;
-const SIMULATED_ONLINE_MAX = 34;
-const ACTIVE_GAMES = GAMES_CATALOG.filter((g) => g.status === "active");
+// Colores del podio (1, 2, 3) y del resto de la lista de Top Ganadores.
+const PODIUM = [
+  { c: "#facc15", bg: "linear-gradient(90deg, rgba(250,204,21,0.28), rgba(250,204,21,0.06))" },
+  { c: "#cbd5e1", bg: "linear-gradient(90deg, rgba(203,213,225,0.22), rgba(203,213,225,0.05))" },
+  { c: "#f59e0b", bg: "linear-gradient(90deg, rgba(217,119,66,0.26), rgba(217,119,66,0.05))" },
+];
+const PODIUM_REST = { c: "#a78bfa", bg: "linear-gradient(90deg, rgba(139,92,246,0.16), rgba(139,92,246,0.03))" };
 
 export default function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const { currentUser } = useSelector((state) => state);
+  // Sin miniatura propia, las tarjetas usan la portada que ya se habia subido (games.<slug>.cover).
+  const siteContent = useSelector((state) => state.siteContent);
+  const cardFallback = (game) => {
+    const cover = siteContent?.[`games.${game.slug}.cover`];
+    return cover?.type === "image" && cover.imageUrl ? cover.imageUrl : game.image;
+  };
+  const orderedGames = useOrderedGames();
   // Al recargar la página, restaurar la sesión (canjear la cookie httpOnly por un access token
   // nuevo) es async — mientras tanto currentUser?.id todavía es falsy en Redux, así que sin este
   // chequeo se alcanzaba a pintar la landing de invitado (con el botón de Iniciar Sesión) un
@@ -49,13 +62,7 @@ export default function Home() {
   const isGuestPreview = !currentUser?.id && searchParams.get("vista") === "invitado";
 
   const [topWinners, setTopWinners] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState([]);
   const [recentWins, setRecentWins] = useState([]);
-  // Target headcount for the simulated players blended into "Jugadores Conectados"
-  // below (see fakeOnlinePlayers.js). Drifts slowly so the widget feels alive.
-  const [simulatedOnlineTarget, setSimulatedOnlineTarget] = useState(
-    () => SIMULATED_ONLINE_MIN + Math.floor(Math.random() * (SIMULATED_ONLINE_MAX - SIMULATED_ONLINE_MIN + 1))
-  );
 
   // La ruleta ya NO aparece sola al loguearse (Unity tiene su propia pantalla de carga, se
   // sentia intrusivo) - se abre solo cuando el jugador clickea la tarjeta "Giro Diario VIP",
@@ -160,35 +167,16 @@ export default function Home() {
     };
   }, [currentUser, auth.loading]);
 
-  // Real top-winners leaderboard (chips actually won in games) + online players list
+  // Real top-winners leaderboard (chips actually won in games)
   useEffect(() => {
     if (!currentUser?.id) return;
     const fetchWidgets = () => {
       axios.get(`${API_URL}/leaderboard/top-winners?limit=5`).then(({ data }) => setTopWinners(data)).catch(() => {});
-      axios.get(`${API_URL}/users/online`).then(({ data }) => setOnlineUsers(data)).catch(() => {});
-      // Small random walk so the simulated headcount below feels like people are
-      // actually coming and going instead of a static number.
-      setSimulatedOnlineTarget((prev) => {
-        const drifted = prev + Math.floor(Math.random() * 7) - 3;
-        return Math.min(SIMULATED_ONLINE_MAX, Math.max(SIMULATED_ONLINE_MIN, drifted));
-      });
     };
     fetchWidgets();
     const interval = setInterval(fetchWidgets, 60 * 1000);
     return () => clearInterval(interval);
   }, [currentUser?.id]);
-
-  // Real online users blended with simulated ones so the widget hits simulatedOnlineTarget.
-  // Memoized so the simulated names/games only reshuffle when the target or real list
-  // actually changes, not on every unrelated re-render.
-  const otherOnlineUsers = useMemo(() => {
-    const realOnlineUsers = onlineUsers.filter((u) => u.id !== currentUser?.id);
-    const simulatedPlayers = generateFakeOnlinePlayers(
-      Math.max(0, simulatedOnlineTarget - realOnlineUsers.length),
-      ACTIVE_GAMES
-    );
-    return [...realOnlineUsers, ...simulatedPlayers];
-  }, [onlineUsers, simulatedOnlineTarget, currentUser?.id]);
 
   // Helper alerts and navigation functions
   const handlePlayGame = (path, title) => {
@@ -369,40 +357,97 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Popular Games & Active Tournament */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-            {/* Popular Games List */}
-            <section className="xl:col-span-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-headline-sm text-headline-sm flex items-center gap-2 text-white">
-                  <span className="material-symbols-outlined text-primary">star</span>
+          {/* Juegos + Top Ganadores/Conectados: una sola grilla. En pantallas grandes el panel de la
+              derecha ocupa las 2 ultimas columnas de las primeras filas y las tarjetas siguen por debajo
+              de el, a todo el ancho (juegos activos y despues los proximos, en gris). */}
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
+              <div className="col-span-2 md:col-span-4 xl:col-start-1 xl:row-start-1 flex items-center justify-between">
+                <h2 className="font-headline-sm text-headline-sm flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[#ffe08f] via-[#f9a8d4] to-[#7dd3fc]">
+                  <span className="w-8 h-8 rounded-lg inline-flex items-center justify-center bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] shadow-[0_0_14px_rgba(139,92,246,0.55)] material-symbols-outlined text-[18px] text-white" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                   <EditableText contentKey="home.dashboard.popularGamesTitle" as="span">
                     {t("home.dashboard.popularGamesTitle")}
                   </EditableText>
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  <GameOrderEditor />
                   <button
                     onClick={() => navigate('/juegos')}
-                    className="w-8 h-8 rounded bg-surface-container border border-outline-variant/20 flex items-center justify-center hover:bg-surface-variant transition-colors text-on-surface cursor-pointer"
+                    className="w-8 h-8 rounded-lg bg-[#8b5cf6]/20 border border-[#a78bfa]/40 flex items-center justify-center hover:bg-[#8b5cf6]/40 transition-colors text-[#c4b5fd] cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-sm">chevron_left</span>
                   </button>
                   <button
                     onClick={() => navigate('/juegos')}
-                    className="w-8 h-8 rounded bg-surface-container border border-outline-variant/20 flex items-center justify-center hover:bg-surface-variant transition-colors text-primary cursor-pointer"
+                    className="w-8 h-8 rounded-lg bg-[#06b6d4]/20 border border-[#22d3ee]/40 flex items-center justify-center hover:bg-[#06b6d4]/40 transition-colors text-[#67e8f9] cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-sm">chevron_right</span>
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {GAMES_CATALOG.filter((game) => game.status === "active" && game.showOnHome !== false).map((game) => (
+                {orderedGames.filter((game) => game.status === "active" && game.showOnHome !== false).map((game) => (
                   <div
                     key={game.slug}
-                    className="group relative bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant/20 hover:border-primary/50 transition-all hover:-translate-y-1"
+                    className="group relative rounded-xl overflow-hidden border-2 transition-all duration-200 hover:-translate-y-1"
+                    style={{
+                      borderColor: `${CATEGORY_META[game.category].accent}66`,
+                      background: `linear-gradient(180deg, #13152a, ${CATEGORY_META[game.category].accentTo}55)`,
+                      boxShadow: `0 6px 18px ${CATEGORY_META[game.category].accent}22`,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = CATEGORY_META[game.category].accent; e.currentTarget.style.boxShadow = `0 0 24px ${CATEGORY_META[game.category].accent}88`; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${CATEGORY_META[game.category].accent}66`; e.currentTarget.style.boxShadow = `0 6px 18px ${CATEGORY_META[game.category].accent}22`; }}
                   >
                     <div className="aspect-[3/4] overflow-hidden">
+                      <EditableImage
+                        contentKey={`games.${game.slug}.thumbnail`}
+                        fallbackSrc={cardFallback(game)}
+                        fallbackIcon={game.icon}
+                        alt={game.name}
+                        className="w-full h-full object-cover"
+                        recommendedSize="600×800px aprox. (vertical), JPG o PNG"
+                      />
+                    </div>
+                    <div className="p-3 text-left">
+                      <span
+                        className="inline-block text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5 text-white"
+                        style={{ background: `linear-gradient(90deg, ${CATEGORY_META[game.category].accent}, ${CATEGORY_META[game.category].accentTo})` }}
+                      >
+                        {t(`catalog.category.${game.category}`)}
+                      </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-bold text-label-lg font-label-lg truncate text-white min-w-0">{game.name}</h4>
+                        <span className="flex items-center gap-1 text-[0.6875rem] text-on-surface-variant flex-shrink-0">
+                          <span className="material-symbols-outlined text-[13px]">person</span>
+                          {new Intl.NumberFormat("es-ES").format(getDisplayedPlayers(game))}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-[#0a0b18]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handlePlayGame(game.playPath, game.name)}
+                        className="bg-gradient-to-r from-[#22c55e] to-[#06b6d4] w-3/4 py-2 rounded-lg font-black text-white text-label-md cursor-pointer border-0 shadow-[0_0_16px_rgba(34,197,94,0.5)] hover:brightness-110"
+                      >
+                        {t("home.dashboard.jugar")}
+                      </button>
+                      <button
+                        onClick={() => navigate(`/juegos/${game.slug}`)}
+                        className="border border-[#a78bfa] bg-[#8b5cf6]/15 text-[#ddd6fe] w-3/4 py-2 rounded-lg font-bold text-label-md hover:bg-[#8b5cf6]/30 cursor-pointer"
+                      >
+                        {t("home.dashboard.info")}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Juegos que todavia no salieron: misma tarjeta, en gris y sin jugar */}
+                {orderedGames.filter((game) => game.status !== "active" && game.showOnHome !== false).map((game) => (
+                  <div
+                    key={game.slug}
+                    onClick={() => navigate(`/juegos/${game.slug}`)}
+                    className="order-1 xl:order-none relative bg-surface-container-high/60 rounded-xl overflow-hidden border border-outline-variant/20 opacity-60 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden grayscale bg-surface-container flex items-center justify-center">
                       <EditableImage
                         contentKey={`games.${game.slug}.cover`}
                         fallbackSrc={game.image}
@@ -413,44 +458,32 @@ export default function Home() {
                       />
                     </div>
                     <div className="p-3 text-left">
-                      <span className={`inline-block text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5 ${CATEGORY_META[game.category].chipClassName}`}>
-                        {t(`catalog.category.${game.category}`)}
+                      <span className="inline-block text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5 text-on-surface-variant/80 border border-outline-variant/30">
+                        {t("catalog.proximamente")}
                       </span>
-                      <h4 className="font-bold text-label-lg font-label-lg truncate text-white">{game.name}</h4>
-                    </div>
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handlePlayGame(game.playPath, game.name)}
-                        className="gold-gradient w-3/4 py-2 rounded font-bold text-on-primary text-label-md cursor-pointer border-0"
-                      >
-                        {t("home.dashboard.jugar")}
-                      </button>
-                      <button
-                        onClick={() => navigate(`/juegos/${game.slug}`)}
-                        className="border border-primary bg-transparent text-primary w-3/4 py-2 rounded font-bold text-label-md hover:bg-primary/10 cursor-pointer"
-                      >
-                        {t("home.dashboard.info")}
-                      </button>
+                      <h4 className="font-bold text-label-lg font-label-lg truncate text-on-surface-variant">{game.name}</h4>
                     </div>
                   </div>
                 ))}
-              </div>
 
-            </section>
-
-            {/* Top Winners + Online Players */}
-            <aside className="xl:col-span-4 flex flex-col gap-6 text-left">
+            {/* Top Winners + Online Players: arriba a la derecha (3 filas: titulo + 2 de tarjetas);
+                en pantallas grandes va "flotando" (absolute) en su lugar de la grilla, asi su alto no estira
+                las filas: el alto lo ponen las tarjetas y la lista de conectados usa scroll. */}
+            <div className="col-span-2 md:col-span-4 xl:col-span-2 xl:col-start-5 xl:row-start-1 xl:row-span-3 xl:relative">
+            <aside className="xl:absolute xl:inset-0 flex flex-col gap-4 text-left min-h-0">
               {/* Top Winners Leaderboard */}
               <div
-                className="bg-surface-container-high rounded-xl border border-emerald-400/30 overflow-hidden flex flex-col"
-                style={{ boxShadow: "0 0 20px rgba(52, 211, 153, 0.15)" }}
+                className="rounded-xl border border-emerald-400/40 overflow-hidden flex flex-col flex-shrink-0 xl:flex-[1_0_auto] bg-gradient-to-b from-[#0f2a2a] to-[#0d0f1f]"
+                style={{ boxShadow: "0 0 24px rgba(52, 211, 153, 0.22)" }}
               >
-                <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-4 flex justify-between items-center">
-                  <h3 className="text-white font-bold text-headline-sm font-headline-sm">{t("home.dashboard.topGanadores")}</h3>
+                <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 p-4 flex justify-between items-center">
+                  <h3 className="text-white font-bold text-headline-sm font-headline-sm flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[22px] text-yellow-300" style={{ fontVariationSettings: "'FILL' 1" }}>emoji_events</span>
+                    {t("home.dashboard.topGanadores")}
+                  </h3>
                   <span className="bg-black/25 text-white px-2 py-1 rounded text-label-md font-label-md font-bold">{t("home.dashboard.enVivo")}</span>
                 </div>
-                <div className="p-6 space-y-3">
+                <div className="p-4 flex flex-col gap-2 xl:flex-[1_0_auto]">
                   {topWinners.length === 0 ? (
                     <p className="text-on-surface-variant text-sm text-center py-4">
                       {t("home.dashboard.noPrizesYet")}
@@ -459,10 +492,14 @@ export default function Home() {
                     topWinners.map((player, index) => (
                       <div
                         key={player.id}
-                        className={`flex items-center justify-between p-3 rounded ${index === 0 ? "bg-surface border-l-4 border-emerald-400" : "bg-surface/50"}`}
+                        className="flex items-center justify-between px-3 py-2 rounded-lg border-l-4 xl:flex-[1_0_auto]"
+                        style={{ background: (PODIUM[index] || PODIUM_REST).bg, borderLeftColor: (PODIUM[index] || PODIUM_REST).c }}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className={`font-bold flex-shrink-0 ${index === 0 ? "text-emerald-400" : "text-on-surface-variant"}`}>
+                          <span
+                            className="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 text-[#0a0b18]"
+                            style={{ background: (PODIUM[index] || PODIUM_REST).c, boxShadow: `0 0 10px ${(PODIUM[index] || PODIUM_REST).c}99` }}
+                          >
                             {index + 1}
                           </span>
                           <button
@@ -473,7 +510,7 @@ export default function Home() {
                             {player.nick}
                           </button>
                         </div>
-                        <span className={`font-bold flex-shrink-0 ${index === 0 ? "text-emerald-400" : "text-on-surface-variant"}`}>
+                        <span className="font-black flex-shrink-0" style={{ color: (PODIUM[index] || PODIUM_REST).c }}>
                           {new Intl.NumberFormat('es-ES').format(player.totalWon)}
                         </span>
                       </div>
@@ -490,69 +527,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Online Players */}
-              <div className="bg-surface-container-high rounded-xl border border-sky-400/20 overflow-hidden flex flex-col">
-                <div className="p-4 border-b border-outline-variant/10 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
-                  <h3 className="font-bold text-headline-sm font-headline-sm text-white">
-                    {otherOnlineUsers.length} {otherOnlineUsers.length === 1 ? t("home.dashboard.jugadorConectado") : t("home.dashboard.jugadoresConectados")}
-                  </h3>
-                </div>
-                <div className="max-h-80 overflow-y-auto divide-y divide-outline-variant/10">
-                  {otherOnlineUsers.length === 0 ? (
-                    <p className="text-on-surface-variant text-sm text-center py-6 px-4">
-                      {t("home.dashboard.noOtherPlayers")}
-                    </p>
-                  ) : (
-                    otherOnlineUsers.map((player) => {
-                      const activeGame = getGameByPlayPath(player.currentActivity);
-                      // Simulated players (see fakeOnlinePlayers.js) have no real profile behind
-                      // them, so only real players (real DB id) link out to /perfil/:nick.
-                      const isRealPlayer = !player.id.startsWith("sim-");
-                      return (
-                        <div key={player.id} className="flex items-center justify-between gap-3 p-3">
-                          <button
-                            type="button"
-                            disabled={!isRealPlayer}
-                            onClick={() => isRealPlayer && navigate(`/perfil/${player.nick}`)}
-                            className={`flex items-center gap-3 min-w-0 bg-transparent border-0 p-0 text-left ${isRealPlayer ? "cursor-pointer group" : "cursor-default"}`}
-                          >
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                              {(player.nick || "RG").slice(0, 2).toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                              <p className={`font-bold text-white text-sm truncate ${isRealPlayer ? "group-hover:text-sky-400 group-hover:underline" : ""}`}>
-                                {player.nick}
-                              </p>
-                              <p className="text-[0.6875rem] text-on-surface-variant truncate">
-                                {activeGame ? <span className="text-sky-400">{t("home.dashboard.jugandoA")} {activeGame.name}</span> : t("home.dashboard.enElSitio")}
-                              </p>
-                            </div>
-                          </button>
-                          {activeGame && (
-                            <button
-                              onClick={() => handlePlayGame(activeGame.playPath, activeGame.name)}
-                              className="px-3 py-1.5 rounded bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[0.6875rem] font-bold uppercase flex-shrink-0 cursor-pointer border-0 hover:brightness-110 transition-all"
-                            >
-                              {t("home.dashboard.jugarBtn")}
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+              <MissionsCard />
 
               {/* Tarjeta de Giro Diario VIP oculta a pedido (ver handleClaimDailySpin,
                   DailySpinModal y GET /daily-spin/status, todo intacto por si se retoma) */}
             </aside>
-          </div>
-
-          {/* Games Catalog by Category — a todo el ancho (no metido en la columna de 8/12 de
-              arriba), para aprovechar el espacio libre que deja el aside más corto al lado. */}
-          <div className="pt-8 border-t border-outline-variant/10">
-            <GamesCatalog compact />
+            </div>
           </div>
 
         </main>
