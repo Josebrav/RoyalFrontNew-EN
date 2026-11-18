@@ -9,7 +9,7 @@ export const SITE_NAME = "RoyalJuegos";
 export const DEFAULT_SEO = {
   title: "RoyalJuegos | Bingo, tragamonedas, ruleta y dominó online gratis",
   description:
-    "Jugá gratis online a bingo, tragamonedas, ruleta, dominó y minas con fichas de regalo. Chat en vivo, rankings y torneos con jugadores de toda Latinoamérica.",
+    "Juegos de casino gratis online: bingo, tragamonedas, ruleta, póker, blackjack, dominó y buraco con fichas de regalo. Sin descargar, con chat en vivo y torneos.",
 };
 
 const PAGE_SEO = {
@@ -120,6 +120,18 @@ export const GAME_SEO = {
   "royal-pachinka": {
     title: "Pachinko online gratis (Royal Pachinka) | RoyalJuegos",
     description: "Royal Pachinka, el pachinko online gratis: soltá las bolas, mirá cómo rebotan y ganá multiplicadores.",
+  },
+  "royal-poker": {
+    title: "Póker online gratis: Texas Hold'em con fichas | RoyalJuegos",
+    description: "Jugá póker Texas Hold'em online gratis en mesas en vivo, con fichas de regalo y chat. Sin descargar, desde el celular o la PC.",
+  },
+  royalcats: {
+    title: "Royal Cats: tragamonedas de gatos gratis | RoyalJuegos",
+    description: "Royal Cats, la tragamonedas de gatos reales con joyas: 243 formas de ganar, giros gratis con WILD pegajosos y bonus de ovillos. Jugá gratis online.",
+  },
+  sweetfuturist: {
+    title: "Sweet Futurist: tragamonedas de dulces neón gratis | RoyalJuegos",
+    description: "Sweet Futurist, la tragamonedas de chocolates de neón: 243 formas de ganar, giros gratis con WILD pegajosos y bonus de regalos. Jugá gratis online.",
   },
 };
 

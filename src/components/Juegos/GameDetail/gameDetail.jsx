@@ -6,6 +6,7 @@ import { POINTS_AND_TOURNAMENTS_NEWS_ID, newsArticlePath } from "../../../data/n
 import Swal from "sweetalert2";
 import { CATEGORY_META, getDisplayedPlayers, getGameBySlug } from "../../../data/gamesCatalog";
 import { swalThemeConfig } from "../../../utils/formatters";
+import { gameFaqFor } from "../../../data/gameFaq";
 import API_URL from "../../../api/rutaApi";
 import EditableImage from "../../ui/EditableImage";
 
@@ -45,6 +46,7 @@ export default function GameDetail() {
   }
 
   const isActive = game.status === "active";
+  const extra = gameFaqFor(game);
   const categoryMeta = CATEGORY_META[game.category];
   // Color de la categoría para el panel de ranking (no todo dorado; el dorado queda para "Jugar").
   const accent = categoryMeta?.accent || "#a855f7";
@@ -107,7 +109,37 @@ export default function GameDetail() {
           <div>
             <h2 className="font-headline-sm text-headline-sm text-white mb-4">Sobre este juego</h2>
             <p className="text-on-surface-variant leading-relaxed">{game.description}</p>
+            {extra?.about?.map((p) => (
+              <p key={p} className="text-on-surface-variant leading-relaxed mt-3">{p}</p>
+            ))}
           </div>
+
+          {extra?.faq?.length > 0 && (
+            <div>
+              <h2 className="font-headline-sm text-headline-sm text-white mb-3">Preguntas frecuentes sobre {game.name}</h2>
+              <div className="divide-y divide-white/10 border-y border-white/10">
+                {extra.faq.map((f) => (
+                  <details key={f.q} className="group py-3">
+                    <summary className="cursor-pointer list-none flex justify-between items-center gap-4 text-white font-semibold">
+                      {f.q}
+                      <span className="material-symbols-outlined text-primary transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <p className="text-on-surface-variant text-sm leading-relaxed mt-2">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    mainEntity: extra.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+                  }),
+                }}
+              />
+            </div>
+          )}
 
           {isActive && (
             <div
