@@ -349,10 +349,7 @@ export const GAMES_CATALOG = [
     slug: "chinchon",
     name: "Chinchón",
     category: "cartas",
-    // Oculto por ahora (pedido del dueño 2026-11-18): no figura en el inicio ni en Juegos
-    hidden: true,
-    showOnHome: false,
-    status: "soon",
+    status: "active",
     image: chinchonImage,
     icon: "style",
     players: 0,
