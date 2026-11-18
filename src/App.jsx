@@ -42,6 +42,7 @@ import Gomitas from './components/Juegos/Gomitas/gomitas';
 import OceanRiches from './components/Juegos/OceanRiches/oceanriches';
 import GamerZone from './components/Juegos/GamerZone/gamerzone';
 import RoyalCats from './components/Juegos/RoyalCats/royalcats';
+import SweetFuturist from './components/Juegos/SweetFuturist/sweetfuturist';
 import Domino from './components/Juegos/Domino/domino';
 import Parchis from './components/Juegos/Parchis/parchis';
 import Buraco from './components/Juegos/Buraco/buraco';
@@ -329,6 +330,7 @@ function App() {
             <Route path="/game/oceanriches" element={<RequireAuth><OceanRiches /></RequireAuth>} />
             <Route path="/game/gamerzone" element={<RequireAuth><GamerZone /></RequireAuth>} />
             <Route path="/game/royalcats" element={<RequireAuth><RoyalCats /></RequireAuth>} />
+            <Route path="/game/sweetfuturist" element={<RequireAuth><SweetFuturist /></RequireAuth>} />
             <Route path="/game/domino" element={<RequireAuth><Domino /></RequireAuth>} />
             <Route path="/game/parchis" element={<RequireAuth><Parchis /></RequireAuth>} />
             <Route path="/game/buraco" element={<RequireAuth><Buraco /></RequireAuth>} />

@@ -55,6 +55,10 @@ export const HUB_SLOTS = {
     title: "Royal Cats",
     url: withPlayer("https://royalcats.s3.us-east-2.amazonaws.com/royalcats/index.html"),
   },
+  sweetfuturist: {
+    title: "Sweet Futurist",
+    url: withPlayer("https://sweetfuturist.s3.us-east-2.amazonaws.com/sweetfuturist/index.html"),
+  },
   gemaofgold: {
     title: "Gema of Gold",
     url: withPlayer("https://gemaofgold.s3.us-east-2.amazonaws.com/Gemaofgold/index.html"),

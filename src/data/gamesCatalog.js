@@ -16,6 +16,7 @@ import gomitasImage from "../assets/gomitas.jpg";
 import oceanRichesImage from "../assets/oceanriches.jpg";
 import gamerZoneImage from "../assets/gamerzone.jpg";
 import royalCatsImage from "../assets/royalcats.jpg";
+import sweetFuturistImage from "../assets/sweetfuturist.jpg";
 import chinchonImage from "../assets/chinchon.jpg";
 
 // `chipClassName` es la misma paleta pero como píldora (fondo + borde translúcidos), para donde
@@ -336,10 +337,13 @@ export const GAMES_CATALOG = [
     slug: "sweetfuturist",
     name: "Sweet Futurist",
     category: "slots",
-    status: "soon",
+    status: "active",
+    image: sweetFuturistImage,
     icon: "rocket_launch",
+    players: 0,
+    playPath: "/game/sweetfuturist",
     description:
-      "Dulces del futuro en una tragamonedas llena de color, neón y premios que caen en cascada.",
+      "Chocolates de neón en una ciudad del futuro: 243 formas de ganar, giros gratis con WILD que quedan pegados y un bonus de regalos neón con multiplicadores.",
   },
   {
     slug: "chinchon",
