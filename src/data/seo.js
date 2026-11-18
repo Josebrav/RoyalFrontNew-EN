@@ -1,10 +1,12 @@
 import { getGameBySlug } from "./gamesCatalog";
+import { LOCALE } from "../i18n/locale";
 
 // Titulo y descripcion de cada pagina para buscadores y para la vista previa al compartir el link.
 // Solo el sitio en espanol (royaljuegos.com); los sitios en ingles/portugues usan el titulo generico.
 
 export const SITE_URL = "https://www.royaljuegos.com";
-export const SITE_NAME = "RoyalJuegos";
+// royaljuegos.com se llama RoyalJuegos; los sitios en portugues (royalgames.lat) e ingles, RoyalGames.
+export const SITE_NAME = LOCALE === "es" ? "RoyalJuegos" : "RoyalGames";
 
 export const DEFAULT_SEO = {
   title: "RoyalJuegos | Bingo, tragamonedas, ruleta y dominó online gratis",
