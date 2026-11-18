@@ -73,8 +73,11 @@ const IMAGE_BY_BASE_CHIPS = {
   1_000_000_000: billon,
   2_600_000_000: veinticeisb,
 };
+// 2026-11-18: todos los paquetes dan 50% más (igual que el backend). `offerChips` es el valor de
+// antes: las ofertas express multiplican ese, así se ven y acreditan igual que antes.
+const PACKAGE_BOOST = 1.5;
 const tiers = (currency, firstId, rows) =>
-  rows.map(([price, chips], i) => ({ id: firstId + i, currency, price, chips }));
+  rows.map(([price, chips], i) => ({ id: firstId + i, currency, price, chips: Math.round(chips * PACKAGE_BOOST), offerChips: chips }));
 
 const CHIP_CATALOG = {
   USD: tiers("USD", 101, [[1, 2_500_000], [5, 15_000_000], [10, 40_000_000], [50, 250_000_000],
@@ -260,7 +263,9 @@ export default function BuyChips() {
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Oferta express: cualquier paquete da sus fichas multiplicadas (el backend decide lo que se acredita).
   const offerMultiplier = currentOffer?.multiplier ?? 1;
-  const visibleChipOptions = CHIP_CATALOG[catalogCurrency].map((chip) => ({ ...chip, chips: chip.chips * offerMultiplier }));
+  const visibleChipOptions = CHIP_CATALOG[catalogCurrency].map((chip) =>
+    offerMultiplier > 1 ? { ...chip, chips: chip.offerChips * offerMultiplier } : chip,
+  );
   const offerItem = currentOffer?.items.find((item) => item.currency === catalogCurrency);
   const offerChip = offerItem ? { id: offerItem.packageId, currency: offerItem.currency, price: offerItem.price, chips: offerItem.chips } : null;
   useEffect(() => {
