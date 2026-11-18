@@ -62,6 +62,7 @@ export default function Sidebar() {
     ...(currentUser?.role === "admin" ? [{ to: "/admin/deposits", icon: "payments", label: t("sidebar.cargas"), color: "#4caf7d" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/staff-chips", icon: "badge", label: t("sidebar.fichasStaff"), color: "#e6c364" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/game-stats", icon: "query_stats", label: t("sidebar.estadisticasJuegos"), color: "#e6c364" }] : []),
+    ...(currentUser?.role === "admin" ? [{ to: "/admin/rtp", icon: "tune", label: t("sidebar.rtp"), color: "#e05252" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/promos", icon: "campaign", label: t("sidebar.promociones"), color: "#2dd4bf" }] : []),
     ...(currentUser?.role === "admin" ? [{ to: "/admin/ofertas", icon: "sell", label: t("sidebar.ofertas"), color: "#e6c364" }] : []),
     { to: "/admin/prizes", icon: "emoji_events", label: t("sidebar.premios"), color: "#a855f7" },
