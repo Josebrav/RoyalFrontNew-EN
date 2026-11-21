@@ -224,6 +224,11 @@ const STRINGS = {
     "missions.tour.next": "Siguiente",
     "missions.tour.finish": "¡Entendido!",
     "missions.tour.skip": "Saltar",
+    "dailyBonus.title": "Bono Diario",
+    "dailyBonus.day": "Día",
+    "dailyBonus.claim": "Reclamar Bono",
+    "dailyBonus.close": "Cerrar",
+    "dailyBonus.error": "No se pudo reclamar el bono diario",
   },
 
   en: {
@@ -445,6 +450,11 @@ const STRINGS = {
     "missions.tour.next": "Next",
     "missions.tour.finish": "Got it!",
     "missions.tour.skip": "Skip",
+    "dailyBonus.title": "Daily Bonus",
+    "dailyBonus.day": "Day",
+    "dailyBonus.claim": "Claim Bonus",
+    "dailyBonus.close": "Close",
+    "dailyBonus.error": "The daily bonus could not be claimed",
   },
 
   pt: {
@@ -666,6 +676,11 @@ const STRINGS = {
     "missions.tour.next": "Próximo",
     "missions.tour.finish": "Entendido!",
     "missions.tour.skip": "Pular",
+    "dailyBonus.title": "Bônus Diário",
+    "dailyBonus.day": "Dia",
+    "dailyBonus.claim": "Resgatar Bônus",
+    "dailyBonus.close": "Fechar",
+    "dailyBonus.error": "Não foi possível resgatar o bônus diário",
   },
 };
 

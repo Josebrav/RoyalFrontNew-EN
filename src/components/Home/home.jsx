@@ -86,7 +86,7 @@ export default function Home() {
   const handleDailyBonusClaimed = ({ error }) => {
     if (error) {
       setDailyBonusStatus((prev) => (prev ? { ...prev, canClaim: false } : prev));
-      Swal.fire({ title: "Bono Diario", text: error, icon: "error", ...swalThemeConfig });
+      Swal.fire({ title: t("dailyBonus.title"), text: error, icon: "error", ...swalThemeConfig });
       return;
     }
     setDailyBonusStatus((prev) => (prev ? { ...prev, canClaim: false } : prev));
